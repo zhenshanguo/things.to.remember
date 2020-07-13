@@ -1,0 +1,10 @@
+//loading shared library for ci service functionality
+library 'shared-lib-ci-service'
+
+//Pipeline deployment
+ciMigrationPipeline {
+    //Container name to be used in the pipeline
+    containerName = 'account-service'
+    //Available container image
+    nodeType = 'rhel6-java-large'
+}

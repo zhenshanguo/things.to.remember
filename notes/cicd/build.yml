@@ -1,0 +1,37 @@
+language: java
+jdk:
+  - oraclejdk8
+notifications:
+  email:
+    recipients:
+      - SBG-AcctGitRelease@intuit.com
+reports:
+  jacoco:
+    excludes:
+      - '**/com/intuit/payments/accountservice/gson/GsonFeatureProvider.*'
+      - '**/com/intuit/payments/accountservice/gson/XMLFeatureProvider.*'
+      - '**/com/intuit/payments/accountservice/dao/model/**'
+      - '**/com/intuit/payments/accountservice/config/**'
+      - '**/com/intuit/payments/accountservice/exception/**'
+      - '**/com/intuit/payments/accountservice/filter/BufferedRequestWrapper.*'
+      - '**/com/intuit/payments/accountservice/services/ServiceResponse.*'
+      - '**/com/intuit/payments/accountservice/util/JAXBUtils.*'
+      - '**/com/intuit/payments/accountservice/*'
+      - '**/com/intuit/payments/accountservice/endpoints/diag/Ops*'
+      - '**/com/intuit/payments/accountservice/endpoints/diag/RuntimeInfo.*'
+      - '**/com/intuit/payments/accountservice/statemachine/AccountUpdateStateMachineV2.class'
+      - '**/com/intuit/payments/accountservice/statemachine/AccountUpdateStateMachineV2$*.class'
+      - '**/com/intuit/payments/accountservice/statemachine/PaymentsStateMachineV1.class'
+      - '**/com/intuit/payments/accountservice/statemachine/PaymentsStateMachineV1$*.class'
+      - '**/com/intuit/payments/accountservice/statemachine/LendingStateMachineV2.class'
+      - '**/com/intuit/payments/accountservice/statemachine/LendingStateMachineV2$*.class'
+      - '**/com/intuit/payments/accountservice/statemachine/PayrollStateMachineV2.class'
+      - '**/com/intuit/payments/accountservice/statemachine/PayrollStateMachineV2$*.class'
+      - '**/com/intuit/payments/accountservice/statemachine/VBDStateMachineV2.class'
+      - '**/com/intuit/payments/accountservice/statemachine/VBDStateMachineV2$*.class'
+      - '**/com/intuit/payments/accountservice/statemachine/StateMachine.class'
+      - '**/com/intuit/payments/accountservice/statemachine/StateMachine$*.class'
+      - '**/com/intuit/payments/accountservice/services/ads/*'
+      - '**/com/intuit/payments/accountservice/email/util/DESEncryptor.class'
+      - '**/com/intuit/payments/accountservice/migration/components/*'
+      - '**/com/intuit/sbg/cases/dto/*'

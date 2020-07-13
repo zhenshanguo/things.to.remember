@@ -1,0 +1,696 @@
+// The library version is controled from the Jenkins configuration
+// To force a version add after lib '@' followed by the version.
+@Library('msaas-shared-lib') _
+@Library(value='ibp-libraries', changelog=false) ibp
+
+node {
+  // setup the global static configuration
+  config = setupMsaasPipeline('msaas-config.yaml')
+}
+
+def STAGE_NAME
+
+
+pipeline {
+
+    agent {
+      kubernetes {
+          label "${config.pod_label}"
+          yamlFile 'KubernetesPods.yaml'
+      }
+    }
+
+    parameters {
+            string (
+                defaultValue: 'ALL',
+                description: 'The target environment(s) (QAL, E2E, PRF, PFI, STGW, STGE, SBXW, SBXE, PRDW, PRDE)',
+                name : 'DEPLOY_ENV')
+            booleanParam (
+                defaultValue: false,
+                description: 'Run integration tests only, no deployment or build',
+                name : 'TEST_ONLY')
+    }
+
+    options {
+      /*
+      daysToKeepStr: history is only kept up to this days.  (6 months ~183 days)
+      numToKeepStr: only this number of build logs are kept.
+      artifactDaysToKeepStr: artifacts are only kept up to this days.
+      artifactNumToKeepStr: only this number of builds have their artifacts kept.
+      */
+      buildDiscarder(logRotator(daysToKeepStr:'183', numToKeepStr: '', artifactDaysToKeepStr: '183', artifactNumToKeepStr: ''))
+    }
+
+  post {
+      always {
+          sendMetrics(config)
+            script {
+                if (env.BRANCH_NAME.equals('master') && !changeRequest()) {
+                    mail to: 'SBG-AcctGitRelease@intuit.com',
+                        subject: "Account Service ${env.JOB_BASE_NAME} build ${currentBuild.currentResult}",
+                        body: "Account Service ${env.JOB_BASE_NAME} build ${currentBuild.currentResult}\n${env.BUILD_URL}"
+
+                    slackSend channel: '#account-svc-preprod',
+                        color: 'good',
+                        failOnError: 'false',
+                        baseUrl: 'https://intuit-teams.slack.com/services/hooks/jenkins-ci/',
+                        tokenCredentialId: 'account-svc-slack-preprod',
+                        message: "Account Service ${env.JOB_BASE_NAME} build ${currentBuild.currentResult}:\n${env.BUILD_URL}"
+                }
+               if (fileExists("/var/run/outputs/testng-results.xml"))  {
+                    sh """
+                        echo inside s3 tracking for testng-result.xml
+                        mkdir -p ${env.WORKSPACE}/s3
+                        ls /var/run/outputs/
+                        cp /var/run/outputs/testng-results.xml ${env.WORKSPACE}/s3/
+                        ls ${env.WORKSPACE}/s3/
+                      """
+                      // post action that uploads all the files to S3 ; Adds comment to PR if it is a PR build and Sends email to receipts defined in s3Config.yml
+                      backupAndTrackS3(configFile: './s3Config.yml')
+               }
+            }
+      }
+      fixed {
+        slackSend (color: '#00FF00', message: "${STAGE_NAME} SUCCEEDED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        emailext (
+            subject: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ${currentBuild.result}",
+            body: """
+                      Job Status for '${env.JOB_NAME} [${env.BUILD_NUMBER}]': ${currentBuild.result}\n\nCheck console output at ${env.BUILD_URL}
+            """,
+            to: "SBG-PCSAccountSvc@intuit.com"
+         )
+      }
+      unsuccessful {
+        slackSend (color: '#FF0000', message: "${STAGE_NAME} FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        emailext (
+            subject: "Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ${currentBuild.result}",
+            body: """
+                      Job Status for '${env.JOB_NAME} [${env.BUILD_NUMBER}]': ${currentBuild.result}\n\nCheck console output at ${env.BUILD_URL}
+            """,
+            to: "SBG-PCSAccountSvc@intuit.com"
+         )
+      }
+  }
+
+  stages {
+      stage('BUILD:') {
+          when {
+            allOf {
+                branch 'master'
+                not {changeRequest()}
+                expression{params.DEPLOY_ENV.toUpperCase() == 'ALL'}
+            }
+          }
+          stages {
+              stage('Docker Multi Stage Build') {
+                  steps {
+                      script {STAGE_NAME='BUILD'}
+                      container('docker') {
+                          cocoonInit(config)
+                          // '--rm=false' is to not auto-delete intermediate contains so we can later do 'docker cp'
+                          // '--build-arg=\"build=${BUILD_URL}\"' is to tag that intermediate container for same reason.
+                          sh label: "docker build", script: "docker build --rm=false --build-arg=\"build=${env.BUILD_URL}\" -t ${config.image_full_name} ."
+
+                          // copy from container the results of the build so we have all the reports.
+                          // this is where Maven puts the results, for other builds change the path to copy.
+                          sh label: "docker cp from build container to outputs", script: "docker cp \$(docker ps -l -a -q -f \"label=image=build\" -f \"label=build=${env.BUILD_URL}\" -f \"status=exited\"):/usr/src/app/target /var/run/outputs"
+                      }
+                      sh script: "cp -R /var/run/outputs \${WORKSPACE}/target"
+                  }
+              }
+
+              stage('Publish') {
+                  parallel {
+                      stage('Cocoon Publish') {
+                           when { expression {return config.enableCocoon} }
+                           steps {
+                               script {STAGE_NAME='COCOON PUBLISH'}
+                               container('docker') {
+                                    cocoonPush(config)
+                               }
+                           }
+                      }
+                      stage('Report Coverage & Unit Test Results') {
+                          steps {
+                              script {STAGE_NAME='UNIT TEST'}
+                              junit '**/surefire-reports/**/*.xml'
+                              codeCov(config)
+                              jacoco inclusionPattern:"com/intuit/payments/accountservice/**/*", exclusionPattern:"com/intuit/payments/accountservice/gson/GsonFeatureProvider.*,com/intuit/payments/accountservice/gson/XMLFeatureProvider.*,com/intuit/payments/accountservice/dao/model/**/*,com/intuit/payments/accountservice/exception/**/*,com/intuit/payments/accountservice/filter/BufferedRequestWrapper.*,com/intuit/payments/accountservice/services/ServiceResponse.*," +
+                              "com/intuit/payments/accountservice/util/JAXBUtils.*,com/intuit/payments/accountservice/endpoints/diag/Ops*,com/intuit/payments/accountservice/endpoints/diag/RuntimeInfo.*,com/intuit/payments/accountservice/statemachine/AccountUpdateStateMachineV2*," +
+                              "com/intuit/payments/accountservice/statemachine/AccountCreateStateMachine*,com/intuit/payments/accountservice/statemachine/PaymentsStateMachineV1*," +
+                              "com/intuit/payments/accountservice/statemachine/LendingStateMachineV2*,com/intuit/payments/accountservice/statemachine/PayrollStateMachineV2*,com/intuit/payments/accountservice/statemachine/VBDStateMachineV2*,com/intuit/payments/accountservice/statemachine/StateMachine*," +
+                              "com/intuit/payments/accountservice/services/ads/*,com/intuit/payments/accountservice/email/util/DESEncryptor.*,com/intuit/payments/accountservice/migration/components/*,com/intuit/payments/accountservice/util/log/AbstractOutputStreamAppender*," +
+                              "com/intuit/payments/accountservice/util/log/OutputStreamManager*,com/intuit/payments/accountservice/util/log/OutputStreamManager*,com/intuit/payments/accountservice/accountcreate/components/MoneyOutOnboardingCommand," +
+                              "com/intuit/sbg/cases/dto/**/*,com/intuit/payments/accountservice/dao/V4*,com/intuit/payments/accountservice/dao/converter/V4*,com/intuit/payments/accountservice/v4/services/MoneyAccountProvider,com/intuit/payments/accountservice/v4/util/MoneyAccountTransformer" +
+                              "com/intuit/payments/accountservice/messaging/consumer/Data*,com/intuit/payments/accountservice/kafka/**/*"
+                          }
+                      }
+                      stage('CPD Certification & Publish') {
+                          steps {
+                              script {STAGE_NAME='CPD'}
+                              container('cpd') {
+                                  cpd(config, "--buildargs DOCKER_TAGS=${config.git_tag}")
+                              }
+                          }
+                      }
+                      stage('Nexus IQ Server Scan') {
+                          steps {
+                              script {STAGE_NAME='NEXUS IQ'}
+                              nexusPolicyEvaluation iqApplication: "${config.asset_id}", iqStage: "build"
+                          }
+                      }
+                      stage('Code Analysis') {
+                          when { expression {return config.SonarQubeAnalysis} }
+                          steps {
+                              script {STAGE_NAME='CODE ANALYSIS'}
+                              container('docker') {
+
+                                  // copy from container bundle for sonar analysis
+                                  sh label: "docker cp from build container to outputs", script: "docker cp \$(docker ps -l -a -q -f \"label=image=build\" -f \"label=build=${env.BUILD_URL}\" -f \"status=exited\"):/usr/src /var/run/outputs/bundle"
+                                  sh script: "cp -R /var/run/outputs/bundle \${WORKSPACE}/bundle"
+                                  sh label: "docker build", script: "docker build -f Dockerfile.sonar --build-arg=\"sonar=${config.SonarQubeEnforce}\" ."
+                              }
+                          }
+                      }
+
+                      stage('checkmarx') {
+                          steps {
+                               script {STAGE_NAME='CHECKMARX'}
+                               checkmarx(config)
+                          }
+                      }
+                  }
+              }
+
+              stage('Scorecard Check') {
+                  when { expression { config.enableScorecardReadinessCheck } }
+                  steps {
+                      script {STAGE_NAME='SCORECARD CHECK'}
+                      scorecardReadiness(config, true)
+                  }
+              }
+          }
+      }
+      stage ('Build Skipped') {
+          when {expression{!allOf { branch 'master'; not {changeRequest()}; expression{params.DEPLOY_ENV.toUpperCase() != 'ALL' }}} }
+          steps {
+              echo 'Skipped full build.'
+          }
+      }
+      stage('QAL:') {
+          when { beforeOptions true; allOf { branch 'master'; not {changeRequest()}; expression {params.DEPLOY_ENV.toUpperCase() == 'ALL' || params.DEPLOY_ENV.toUpperCase().contains('QAL')} }}
+          options {
+              lock(resource: getEnv(config, 'qal').namespace, inversePrecedence: true)
+              timeout(time: 40, unit: 'MINUTES')
+          }
+          stages {
+              stage('Deploy') {
+                  when { expression{!params.TEST_ONLY} }
+                  steps {
+                      script {STAGE_NAME='QA DEPLOY'}
+                      container('cdtools') {
+                          //This has to be the first action in the first sub-stage.
+                          milestone(ordinal: 10, label: "Deploy-qal-milestone")
+                          gitOpsDeploy(config, "qal", config.image_full_name)
+                      }
+                  }
+              }
+              stage('Test') {
+                 steps {
+                     script {STAGE_NAME='QA TEST'}
+                     withCredentials([usernamePassword(credentialsId: 'github-svc-sbseg-ci', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                         container('test') {
+                            sh "echo Running Integration Tests"
+                            script {
+                                def testEnv = "aws-qa"
+                                def testSuiteFile = "testng-iks-qal.xml"
+                                def env = "QA"
+                                dir ('account-service-automation') {
+                                    try {
+                                        deleteDir()
+                                    } catch (err) {
+                                       // swallow exception to prevent build from failing
+                                       echo "caught error deleting directory, continuing pipeline execution: ${err}"
+                                    }
+                                }
+
+                                try {
+                                   sh "git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.intuit.com/payments/account-service-automation.git"
+                                   dir ('account-service-automation') {
+                                       sh "ls"
+                                       sh "mvn -s settings.xml --batch-mode clean test -Denv=${testEnv} -DsuiteXmlFile=${testSuiteFile} -Dasync=True  -Dspring.cloud.bootstrap.name=bootstrap-aws"
+                                   }
+                                } catch (err) {
+                                   echo "Error running integration tests : ${err}"
+                                   throw err
+                                } finally {
+                                   if (fileExists("account-service-automation/target/surefire-reports")) {
+                                      echo "Archiving Integration test report"
+                                      sh "mkdir -p test/accountservice-test/reports/${env}/surefire-reports && rm -rf account-service-automation/target/surefire-reports/TEST-TestSuite.xml && rm -rf account-service-automation/target/surefire-reports/junitreports/*  && cp -r account-service-automation/target/surefire-reports test/accountservice-test/reports/${env}/surefire-reports"
+                                      echo "Publishing integration unit test reports"
+                                      sh "ls -la account-service-automation/target/surefire-reports/*"
+                                      junit allowEmptyResults: true, testResults:  '**/surefire-reports/**/*.xml'
+                                      publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, keepAll: true, reportDir: 'account-service-automation/target/surefire-reports', reportFiles: 'index.html', reportName: 'QA Integration Test Report'])
+                                   }
+                                }
+                            }
+                         }
+                     }
+                     /*
+                     publishHTML (target: [
+                             allowMissing: false,
+                             alwaysLinkToLastBuild: false,
+                             keepAll: true,
+                             reportDir: '/var/run/outputs/target/surefire-reports',
+                             reportFiles: 'index.html',
+                             reportName: 'Regression Test Report'
+                     ]) */
+                 }
+              }
+          }
+      }
+
+      stage('E2E:') {
+          when {beforeOptions true; allOf {branch 'master'; not {changeRequest()}; expression{params.DEPLOY_ENV.toUpperCase() == 'ALL' || params.DEPLOY_ENV.toUpperCase().contains('E2E') }} }
+          options {
+              lock(resource: getEnv(config, 'e2e').namespace, inversePrecedence: true)
+              timeout(time: 35, unit: 'MINUTES')
+          }
+          stages {
+              stage('Scorecard Check') {
+                  when { expression { config.enableScorecardReadinessCheck } }
+                  steps {
+                      scorecardReadiness(config, true)
+                  }
+              }
+              stage('Deploy') {
+                  when { expression{!params.TEST_ONLY} }
+                  steps {
+                      script {STAGE_NAME='E2E DEPLOY'}
+                      container('cdtools') {
+                          //This has to be the first action in the first sub-stage.
+                          milestone(ordinal: 20, label: "Deploy-e2e-usw2-milestone")
+                          gitOpsDeploy(config, "e2e", config.image_full_name)
+                      }
+                  }
+              }
+              stage('Test') {
+                 steps {
+                     script {STAGE_NAME='E2E TEST'}
+                     withCredentials([usernamePassword(credentialsId: 'github-svc-sbseg-ci', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                         container('test') {
+                            sh "echo Running Integration Tests"
+                            script {
+                                def testEnv = "aws-ptc"
+                                def testSuiteFile = "testng-aws-ptc.xml"
+                                def env = "E2E"
+                                dir ('account-service-automation') {
+                                    try {
+                                        deleteDir()
+                                    } catch (err) {
+                                       // swallow exception to prevent build from failing
+                                       echo "caught error deleting directory, continuing pipeline execution: ${err}"
+                                    }
+                                }
+
+                                try {
+                                   sh "git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.intuit.com/payments/account-service-automation.git"
+                                   dir ('account-service-automation') {
+                                       sh "ls"
+                                       sh "mvn -s settings.xml --batch-mode clean test -Denv=${testEnv} -DsuiteXmlFile=${testSuiteFile} -Dasync=True -Dspring.cloud.bootstrap.name=bootstrap-aws"
+                                   }
+                                } catch (err) {
+                                   echo "Error running integration tests : ${err}"
+                                   throw err
+                                } finally {
+                                   if (fileExists("account-service-automation/target/surefire-reports")) {
+                                      echo "Archiving Integration test report"
+                                      sh "mkdir -p test/accountservice-test/reports/${env}/surefire-reports && rm -rf account-service-automation/target/surefire-reports/TEST-TestSuite.xml && rm -rf account-service-automation/target/surefire-reports/junitreports/* && cp -r account-service-automation/target/surefire-reports test/accountservice-test/reports/${env}/surefire-reports"
+                                      echo "Publishing integration unit test reports"
+                                      sh "ls -la account-service-automation/target/surefire-reports/*"
+                                      sh "cp account-service-automation/target/surefire-reports/testng-results.xml /var/run/outputs"
+                                      junit allowEmptyResults: true, testResults: '**/surefire-reports/**/*.xml'
+                                      publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, keepAll: true, reportDir: 'account-service-automation/target/surefire-reports', reportFiles: 'index.html', reportName: 'E2E Integration Test Report'])
+                                   }
+                                }
+                            }
+                         }
+                     }
+                 }
+              }
+          }
+      }
+      stage('PRF:') {
+          when { beforeOptions true; allOf { branch 'master'; not {changeRequest()}; expression{params.DEPLOY_ENV.toUpperCase() == 'ALL' || params.DEPLOY_ENV.toUpperCase().contains('PRF') || params.DEPLOY_ENV.toUpperCase().contains('PFI')}} }
+          options {
+              lock(resource: getEnv(config, 'prf').namespace, inversePrecedence: true)
+              timeout(time: 22, unit: 'MINUTES')
+          }
+          stages {
+              stage('Scorecard Check') {
+                  when { expression { config.enableScorecardReadinessCheck } }
+                  steps {
+                      scorecardReadiness(config, true)
+                  }
+              }
+              stage('Deploy') {
+                  when { expression{!params.TEST_ONLY && (params.DEPLOY_ENV.toUpperCase() == 'ALL' || params.DEPLOY_ENV.toUpperCase().contains('PRF'))} }
+                  steps {
+                      script {STAGE_NAME='PRF DEPLOY'}
+                      container('cdtools') {
+                          //This has to be the first action in the first sub-stage.
+                          milestone(ordinal: 20, label: "Deploy-prf-milestone")
+                          gitOpsDeploy(config, "prf", config.image_full_name)
+                      }
+                  }
+              }
+              stage('PFI') {
+                  when { allOf { branch 'master'; expression{params.DEPLOY_ENV.toUpperCase() == 'ALL' || params.DEPLOY_ENV.toUpperCase().contains('PRF') || params.DEPLOY_ENV.toUpperCase().contains('PFI')}} }
+                  steps {
+                      script {STAGE_NAME='PFI DEPLOY'}
+                      withCredentials([usernamePassword(credentialsId: "artifactory-account-service",  passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                          container('docker') {
+                              sh """
+                                  echo \${DOCKER_PASSWORD} | docker login docker.artifactory.a.intuit.com -u \${DOCKER_USERNAME} --password-stdin
+                                  cd test/perf-test
+                                  docker build -f Dockerfile-test . -t docker.artifactory.a.intuit.com/money/profile/account-service/service/account-service-perftests:latest
+                                  docker push docker.artifactory.a.intuit.com/money/profile/account-service/service/account-service-perftests:latest
+                              """
+                          }
+                      }
+                  }
+              }
+          }
+      }
+
+      stage('Goto-Stage Approval') {
+          when {
+              allOf { branch 'master'; not {changeRequest()}; not { expression {return config.preprodOnly} }; expression{params.DEPLOY_ENV.toUpperCase().contains('STGW') || params.DEPLOY_ENV.toUpperCase().contains('STGE')}
+              }
+          }
+          options {
+              timeout(time: 1, unit: 'DAYS')
+          }
+          steps {
+              container('jnlp') {
+                  gitOpsApproval(config, "stg")
+              }
+              // Milestone is here, cause no milestore allowed in parallel
+              milestone(ordinal: 40, label: "Deploy-prd-milestone")
+          }
+      }
+      stage('STG USW2:') {
+          when { beforeOptions true; allOf { branch 'master'; not {changeRequest()}; not { expression {return config.preprodOnly} }; expression{params.DEPLOY_ENV.toUpperCase().contains('STGW')} } }
+          options {
+              lock(resource: getEnv(config, 'stg').namespace, inversePrecedence: true)
+              timeout(time: 22, unit: 'MINUTES')
+          }
+          stages {
+              stage('Deploy') {
+                  when { expression{!params.TEST_ONLY} }
+                  steps {
+                      script {STAGE_NAME='STG WEST DEPLOY'}
+                      container('cdtools') {
+                          //This has to be the first action in the first sub-stage.
+                          gitOpsDeploy(config, "stg", config.image_full_name)
+                      }
+                  }
+              }
+              stage('Test') {
+                  steps {
+                      script {
+                          STAGE_NAME='STG WEST TEST'
+                          def deployEnv = "STG-USW2"
+                          def testEnvName = "aws-stg-west"
+                          def testSuiteFile = "testng-aws-prd-west.xml"
+                          timeout(time: 30, unit: 'MINUTES') {
+                              integrationTest(testEnvName, testSuiteFile, deployEnv)
+                          }
+                      }
+                  }
+              }
+              stage('Scorecard Check') {
+                  when { expression { config.enableScorecardReadinessCheck } }
+                  steps {
+                      scorecardReadiness(config, false, "stg")
+                  }
+              }
+          }
+      }
+      stage('STG USE2:') {
+          when { beforeOptions true; allOf { branch 'master'; not {changeRequest()}; not { expression {return config.preprodOnly}}; expression{params.DEPLOY_ENV.toUpperCase().contains('STGE')} } }
+          options {
+              lock(resource: getEnv(config, 'stg-use2').namespace, inversePrecedence: true)
+              timeout(time: 22, unit: 'MINUTES')
+          }
+          stages {
+              stage('Deploy') {
+                  when { expression{!params.TEST_ONLY} }
+                  steps {
+                      script {STAGE_NAME='STG EAST DEPLOY'}
+                      container('cdtools') {
+                          //This has to be the first action in the first sub-stage.
+                          gitOpsDeploy(config, "stg-use2", config.image_full_name)
+                      }
+                  }
+              }
+              stage('Test') {
+                  steps {
+                      script {
+                          STAGE_NAME='STG EAST TEST'
+                          def deployEnv = "STG-USE2"
+                          def testEnvName = "aws-stg-east"
+                          def testSuiteFile = "testng-aws-prd-east.xml"
+                          timeout(time: 30, unit: 'MINUTES') {
+                              integrationTest(testEnvName, testSuiteFile, deployEnv)
+                          }
+                      }
+                  }
+              }
+              stage('Scorecard Check') {
+                  when { expression { config.enableScorecardReadinessCheck } }
+                  steps {
+                      scorecardReadiness(config, false, "stg-use2")
+                  }
+              }
+          }
+      }
+      stage('Go Live in Prod Approval') {
+          when { allOf { branch 'master'; not {changeRequest()}; not { expression {return config.preprodOnly} }; expression{params.DEPLOY_ENV.toUpperCase().contains('SBXW') || params.DEPLOY_ENV.toUpperCase().contains('SBXE') || params.DEPLOY_ENV.toUpperCase().contains('PRDW') || params.DEPLOY_ENV.toUpperCase().contains('PRDE')} } }
+          agent none
+          options {
+              timeout(time: 1, unit: 'DAYS')
+          }
+          steps {
+              gitOpsApproval(config, "sbx-use2")
+          }
+      }
+
+      stage('SBX USE2:') {
+          when { beforeOptions true; allOf { branch 'master'; not {changeRequest()}; not { expression {return config.preprodOnly} }; expression {params.DEPLOY_ENV.toUpperCase().contains('SBXE')} } }
+          options {
+              lock(resource: getEnv(config, 'sbx-use2').namespace, inversePrecedence: true)
+              timeout(time: 22, unit: 'MINUTES')
+          }
+          stages {
+              stage('Deploy') {
+                  when { expression{!params.TEST_ONLY} }
+                  steps {
+                      script {STAGE_NAME='SBX EAST DEPLOY'}
+                      container('cdtools') {
+                          //This has to be the first action in the first sub-stage.
+                          gitOpsDeploy(config, "sbx-use2", config.image_full_name)
+                      }
+                  }
+              }
+              stage('Test') {
+                  steps {
+                      script {
+                          STAGE_NAME='SBX EAST TEST'
+                          def deployEnv = "SBX-USE2"
+                          def testEnvName = "aws-sbx-east"
+                          def testSuiteFile = "testng-aws-sbx-east.xml"
+                          timeout(time: 30, unit: 'MINUTES') {
+                              integrationTest(testEnvName, testSuiteFile, deployEnv)
+                          }
+                      }
+                  }
+              }
+              stage('Scorecard Check') {
+                  when { expression { config.enableScorecardReadinessCheck } }
+                  steps {
+                      scorecardReadiness(config, false, "sbx-use2")
+                  }
+              }
+          }
+      }
+      stage('PRD USE2:') {
+          when { beforeOptions true; allOf { branch 'master'; not {changeRequest()}; not { expression {return config.preprodOnly} }; expression{params.DEPLOY_ENV.toUpperCase().contains('PRDE')} } }
+          options {
+              lock(resource: getEnv(config, 'prd-use2').namespace, inversePrecedence: true)
+              timeout(time: 22, unit: 'MINUTES')
+          }
+          stages {
+              stage('Deploy') {
+                  when { expression{!params.TEST_ONLY} }
+                  steps {
+                      script {STAGE_NAME='PROD EAST DEPLOY'}
+                      container('cdtools') {
+                          //This has to be the first action in the first sub-stage.
+                          gitOpsDeploy(config, "prd-use2", config.image_full_name)
+                      }
+                  }
+              }
+              stage('Test') {
+                  steps {
+                      script {
+                          STAGE_NAME='PROD EAST TEST'
+                          def deployEnv = "PRD-USE2"
+                          def testEnvName = "aws-prd-east"
+                          def testSuiteFile = "testng-aws-prd-east.xml"
+                          timeout(time: 30, unit: 'MINUTES') {
+                              integrationTest(testEnvName, testSuiteFile, deployEnv)
+                          }
+                      }
+                  }
+              }
+              stage('Scorecard Check') {
+                  when { expression { config.enableScorecardReadinessCheck } }
+                  steps {
+                      scorecardReadiness(config, false, "prd-use2")
+                  }
+              }
+          }
+      }
+
+      stage('SBX USW2:') {
+          when { beforeOptions true;  allOf { branch 'master'; not {changeRequest()}; not { expression {return config.preprodOnly} }; expression{params.DEPLOY_ENV.toUpperCase().contains('SBXW')} } }
+          options {
+              lock(resource: getEnv(config, 'sbx').namespace, inversePrecedence: true)
+              timeout(time: 22, unit: 'MINUTES')
+          }
+          stages {
+              stage('Deploy') {
+                  when { expression{!params.TEST_ONLY} }
+                  steps {
+                      script {STAGE_NAME='SBX WEST DEPLOY'}
+                      container('cdtools') {
+                          //This has to be the first action in the first sub-stage.
+                          gitOpsDeploy(config, "sbx", config.image_full_name)
+                      }
+                  }
+              }
+              stage('Test') {
+                  steps {
+                      script {
+                          STAGE_NAME='SBX WEST TEST'
+                          def deployEnv = "SBX-USW2"
+                          def testEnvName = "aws-sbx"
+                          def testSuiteFile = "testng-aws-sbx.xml"
+                          timeout(time: 30, unit: 'MINUTES') {
+                              integrationTest(testEnvName, testSuiteFile, deployEnv)
+                          }
+                      }
+                  }
+              }
+              stage('Scorecard Check') {
+                  when { expression { config.enableScorecardReadinessCheck } }
+                  steps {
+                      scorecardReadiness(config, false, "sbx")
+                  }
+              }
+          }
+      }
+
+      stage('PRD:') {
+          when { allOf { branch 'master'; not {changeRequest()}; not { expression {return config.preprodOnly} }; expression{params.DEPLOY_ENV.toUpperCase().contains('PRDW')} } }
+          options {
+              lock(resource: getEnv(config, 'prd').namespace, inversePrecedence: true)
+              timeout(time: 22, unit: 'MINUTES')
+          }
+          stages {
+              stage('Scorecard Readiness Check') {
+                  when { expression { config.enableScorecardReadinessCheck } }
+                  steps {
+                      scorecardReadiness(config, false, "prd")
+                  }
+              }
+              stage('Create CR') {
+                  steps {
+                      container('servicenow') {
+                          sh label: "Uncomment to open CR", script: "exit 0"
+                          // openSnowCR(config, "prd", config.image_full_name)
+                      }
+                  }
+              }
+              stage('Deploy') {
+                  when { expression{!params.TEST_ONLY} }
+                  steps {
+                      script {STAGE_NAME='PROD WEST DEPLOY'}
+                      container('cdtools') {
+                          //This has to be the first action in the first sub-stage.
+                          gitOpsDeploy(config, "prd", config.image_full_name)
+                      }
+                  }
+              }
+              stage('Test') {
+                  steps {
+                      script {
+                          STAGE_NAME='PROD WEST TEST'
+                          def deployEnv = "PRD-USW2"
+                          def testEnvName = "aws-prd-west"
+                          def testSuiteFile = "testng-aws-prd-west.xml"
+                          timeout(time: 30, unit: 'MINUTES') {
+                              integrationTest(testEnvName, testSuiteFile, deployEnv)
+                          }
+                      }
+                  }
+              }
+              // If any failure, CR remains open and MUST be closed manually with cause.
+              stage('Close CR') {
+                  steps {
+                      container('servicenow') {
+                          sh label: "Uncomment to close CR", script: "exit 0"
+                          // closeSnowCR(config, "prd-usw2")
+                      }
+                  }
+              }
+          }
+      }
+  }
+}
+
+
+def integrationTest(testEnvName, testSuiteFile, deployEnv) {
+    container('test') {
+        try {
+                withCredentials([usernamePassword(credentialsId: 'github-svc-sbseg-ci', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    sh "echo Running Integration Tests"
+                    if (fileExists("account-service-automation")) {
+                        echo "account-service-automation directory already present, skipping git clone"
+                    } else {
+                        echo "cloning account-service-automation git repo"
+                        sh "git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.intuit.com/payments/account-service-automation.git"
+                    }
+                    dir ('account-service-automation') {
+                        sh "ls"
+                        sh "mvn -s settings.xml --batch-mode clean test -Denv=${testEnvName} -DsuiteXmlFile=${testSuiteFile} -Dspring.cloud.bootstrap.name=bootstrap-aws"
+                    }
+                }
+            } catch (err) {
+                echo "Error running integration tests : ${err}"
+                throw err
+            } finally {
+                if (fileExists("account-service-automation/target/surefire-reports")) {
+                    echo "Archiving Integration test report"
+                    sh "mkdir -p test/accountservice-test/reports/${deployEnv}/surefire-reports && cp -r account-service-automation/target/surefire-reports test/accountservice-test/reports/${deployEnv}/surefire-reports"
+                    echo "Publishing integration unit test reports"
+                    sh "ls -la account-service-automation/target/surefire-reports/*"
+                    junit allowEmptyResults: true, testResults: '**/surefire-reports/**/*.xml'
+                    publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, keepAll: true, reportDir: 'account-service-automation/target/surefire-reports', reportFiles: 'index.html', reportName: 'Integration Test Reports'])
+
+                }
+            }
+    }
+}
+

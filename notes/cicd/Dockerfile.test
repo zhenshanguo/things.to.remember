@@ -1,0 +1,15 @@
+FROM docker.artifactory.a.intuit.com/money/profile/account-service/service/account-service:cocoon AS cocoon
+FROM docker.intuit.com/oicp/standard/maven/amzn-maven-corretto8:1.0.0 AS build
+COPY --from=cocoon /root/.m2 /root/.m2
+
+ARG TEST_ENV
+ARG TEST_SUITE
+ARG GIT_USERNAME
+ARG GIT_PASSWORD
+ARG build
+LABEL build=${build}
+
+RUN echo Running Integration Tests
+
+RUN git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.intuit.com/payments/account-service-automation.git
+RUN cd account-service-automation && mvn -s settings.xml --batch-mode clean test -Denv=${TEST_ENV} -DsuiteXmlFile=${TEST_SUITE} -Dspring.cloud.bootstrap.name=bootstrap-aws

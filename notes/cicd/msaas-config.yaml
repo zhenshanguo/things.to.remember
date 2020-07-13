@@ -1,0 +1,140 @@
+l1: money
+l2: profile
+service_name: account-service
+asset_id: 1947824431026009179
+asset_alias: null
+# Cocoon
+enableCocoon: true
+cleanupCocoon: false
+cocoonBasic: dev/patterns/cocoon/service/basic
+
+code_repo: github.intuit.com/payments/account-service.git
+deploy_repo: github.intuit.com/money-profile/account-service-deployment.git
+
+argocd_server: payments.argocd.tools-k8s-prd.a.intuit.com:443
+argocd_password: argocd-account-service
+argocd_project: money-profile-account-service
+argocd_project_enabled: true
+
+registry: docker.artifactory.a.intuit.com
+repo: money/profile/account-service/service
+
+# change this to false once ready for PRD
+preprodOnly: false
+snow_application_name: "TODO"
+
+# change this to true for enabling Jira stories to be transitioned
+enableJiraTransition: false
+# change this to true for enable Code Analysis stage
+SonarQubeAnalysis: true
+
+# change this to true for stop your pipeline in quality gate error
+SonarQubeEnforce: false
+
+# bypass scorecard readiness check
+enableScorecardReadinessCheck: false
+
+environments:
+  e2e:
+    ingress_endpoint: https://money-profile-e2e-account-service.payment-sgmnt-ppd-usw2.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-ppd-usw-l62o28-602037984.us-west-2.elb.amazonaws.com
+    namespace: money-profile-account-service-usw2-ppd-e2e
+    region: usw2
+    iks_type: ppd
+    manifest_format: Kustomize
+
+  qal:
+    ingress_endpoint: https://money-profile-qal-account-service.payment-sgmnt-ppd-usw2.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-ppd-usw-l62o28-602037984.us-west-2.elb.amazonaws.com
+    namespace: money-profile-account-service-usw2-ppd-qal
+    region: usw2
+    iks_type: ppd
+    manifest_format: Kustomize
+
+  dev:
+    ingress_endpoint: https://money-profile-dev-account-service.payment-sgmnt-ppd-usw2.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-ppd-usw-l62o28-602037984.us-west-2.elb.amazonaws.com
+    namespace: money-profile-account-service-usw2-ppd-dev
+    region: usw2
+    iks_type: ppd
+    manifest_format: Kustomize
+
+  prf:
+    ingress_endpoint: https://money-profile-prf-account-service.payment-sgmnt-ppd-usw2.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-ppd-usw-l62o28-602037984.us-west-2.elb.amazonaws.com
+    namespace: money-profile-account-service-usw2-ppd-prf
+    region: usw2
+    iks_type: ppd
+    manifest_format: Kustomize
+
+  pfi:
+    ingress_endpoint: https://money-profile-pfi-account-service.payment-sgmnt-ppd-usw2.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-ppd-usw-l62o28-602037984.us-west-2.elb.amazonaws.com
+    namespace: money-profile-account-service-usw2-ppd-pfi
+    region: usw2
+    iks_type: ppd
+    manifest_format: Kustomize
+
+  stg-use2:
+    ingress_endpoint: https://money-profile-stg-account-service.payment-sgmnt-prod.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-prod-cl-2r93d3-1508547364.us-east-2.elb.amazonaws.com
+    namespace: money-profile-account-service-use2-prd-stg
+    region: use2
+    iks_type: prd
+    manifest_format: Kustomize
+
+  prd-use2:
+    ingress_endpoint: https://money-profile-prd-account-service.payment-sgmnt-prod.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-prod-cl-2r93d3-1508547364.us-east-2.elb.amazonaws.com
+    namespace: money-profile-account-service-use2-prd-prd
+    region: use2
+    iks_type: prd
+    manifest_format: Kustomize
+
+  sbx-use2:
+    ingress_endpoint: https://money-profile-sbx-account-service.payment-sgmnt-prod.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-prod-cl-2r93d3-1508547364.us-east-2.elb.amazonaws.com
+    namespace: money-profile-account-service-use2-prd-sbx
+    region: use2
+    iks_type: prd
+    manifest_format: Kustomize
+
+  e2e-use2:
+    ingress_endpoint: https://money-profile-e2e-account-service.payment-sgmnt-ppd.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-ppd-clu-v7c84d-1332277199.us-east-2.elb.amazonaws.com
+    namespace: money-profile-account-service-use2-ppd-e2e
+    region: use2
+    iks_type: ppd
+    manifest_format: Kustomize
+
+  prf-use2:
+    ingress_endpoint: https://money-profile-prf-account-service.payment-sgmnt-ppd.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-ppd-clu-v7c84d-1332277199.us-east-2.elb.amazonaws.com
+    namespace: money-profile-account-service-use2-ppd-prf
+    region: use2
+    iks_type: ppd
+    manifest_format: Kustomize
+
+  prd:
+    ingress_endpoint: https://money-profile-prd-account-service.payment-sgmnt-prod-usw2.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-prod-us-jpqdd7-2055083576.us-west-2.elb.amazonaws.com
+    namespace: money-profile-account-service-usw2-prd-prd
+    region: usw2
+    iks_type: prd
+    manifest_format: Kustomize
+
+  sbx:
+    ingress_endpoint: https://money-profile-sbx-account-service.payment-sgmnt-prod-usw2.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-prod-us-jpqdd7-2055083576.us-west-2.elb.amazonaws.com
+    namespace: money-profile-account-service-usw2-prd-sbx
+    region: usw2
+    iks_type: prd
+    manifest_format: Kustomize
+
+  stg:
+    ingress_endpoint: https://money-profile-stg-account-service.payment-sgmnt-prod-usw2.iks.a.intuit.com
+    cluster: https://api-payment-sgmnt-prod-us-jpqdd7-2055083576.us-west-2.elb.amazonaws.com
+    namespace: money-profile-account-service-usw2-prd-stg
+    region: usw2
+    iks_type: prd
+    manifest_format: Kustomize
