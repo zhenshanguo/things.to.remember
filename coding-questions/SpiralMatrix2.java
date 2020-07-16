@@ -1,3 +1,18 @@
+/*
+Given an integer n, generate a square matrix filled with elements from 1 to n2 in spiral order.
+
+For example,
+Given n = 3,
+
+You should return the following matrix:
+
+[
+ [ 1, 2, 3 ],
+ [ 8, 9, 4 ],
+ [ 7, 6, 5 ]
+]
+*/
+
 import java.util.Arrays;
 import java.lang.Math;
 import java.util.List;
@@ -23,6 +38,7 @@ public class Main
                 matrix[x][endy] = num++;
             }
             // 如果行或列遍历完，则退出循环
+            /* not really necessary */
             if (startx == endx || starty == endy) {
                 break;
             }

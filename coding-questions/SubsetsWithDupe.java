@@ -1,3 +1,26 @@
+/*
+Given a collection of integers that might contain duplicates, nums, return all possible subsets.
+
+Note:
+
+Elements in a subset must be in non-descending order.
+The solution set must not contain duplicate subsets.
+For example,
+If nums = [1,2,2], a solution is:
+
+[
+  [2],
+  [1],
+  [1,2,2],
+  [2,2],
+  [1,2],
+  []
+]
+*/
+
+/* 使用二进制，不需要递归。对于二进制中的每一位，0表示不选择，1表示选择。则有2^n种情况。
+使用HashSet，能够直接过滤重复情况（先对数组排序，题目中也要求每个list非降序排列）*/
+
 import java.util.Arrays;
 import java.lang.Math;
 import java.util.List;

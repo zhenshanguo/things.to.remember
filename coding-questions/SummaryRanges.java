@@ -1,3 +1,9 @@
+/* 
+Given a sorted integer array without duplicates, return the summary of its ranges.
+
+For example, given [0,1,2,4,5,7], return ["0->2","4->5","7"].
+*/
+
 import java.util.Arrays;
 import java.lang.Math;
 import java.util.List;
@@ -9,13 +15,21 @@ public class Main
 {
     public List<String> summaryRanges(int[] nums) {
         List<String> rt = new ArrayList<String>();
+        
+        // check edge case
         if (nums == null || nums.length == 0) {
             return rt;
         }
+        
+        // one-pass loop, we maintain 2 variables, one is range start, and the other is range end
         for (int i = 0; i < nums.length; i++) {
+        
+        	//reset the start element and end element to current element in array
             int st = nums[i];
             int ed = st;
-            while (i + 1 < nums.length && nums[i + 1] - ed == 1) {
+            
+            //searching continuous element starting from index i, and update index ed and i
+            while (i + 1 < nums.length && nums[i + 1] - nums[i] == 1) {
                 i++;
                 ed++;
             }

@@ -22,10 +22,17 @@ public class Main
             int digit = (digits[i]+carry)%10; 
             carry = (digits[i]+carry)/10;
             digits[i] = digit;
+            
+            //this is quite efficient, when carry is zero, there will be no chance for carry=1 any more
             if(carry==0) {
                 return digits;   
             }
         }
+        
+        /* only when all digits in the array are 9, we need one more element, so we can do this 
+           check at the beginning. below is a smart way to do it, when we need an extra digit, 
+           the result must be in the form of 10...0 */
+           
         int [] res = new int[digits.length+1];    
         res[0] = 1;
         

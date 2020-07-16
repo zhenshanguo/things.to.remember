@@ -19,6 +19,14 @@ If nums = [1,2,3], a solution is:
 ]
 */
 
+/* 
+ this problem can also be solved using binary instead of recursive way. one bit for each number in the array. 
+ 1 means the number is selected in the subset, and 0 means not select. there are totally 2^n ways
+ if there is no duplicate numbers in the array
+
+ when there are duplicate numbers, we will need to rely on set to eliminate duplicates 
+*/
+ 
 import java.util.Arrays;
 import java.lang.Math;
 import java.util.List;
@@ -31,13 +39,17 @@ public class Main
     List<List<Integer>> rt;// 存储结果
     
     public void search(int p, int[] nums) {
-        // 若长度为p，则stack是其中一个结果，保存结果
+        // if current length p, equals to target length, target, we add current stack to result list
         if (p == target) {
             rt.add(new ArrayList<Integer>(Arrays.asList(stack)));
             System.out.println(Arrays.toString(stack));
             return;
         }
+        
+        // go through all element in the array
         for (int i = 0; i < nums.length; i++) {
+        // when there are at least one number in current stack, we need to make sure we only select 
+        // numbers that are bigger than the largest number in current stack to ensure the ascending order
             if (p > 0 && nums[i] <= stack[p - 1]) {
                 continue;
             }
@@ -65,8 +77,3 @@ public class Main
 	
 }
 
-// this can be solved using binary instead of recursive way. one bit for each number in the array. 
-// 1 means the number is selected in the subset, and 0 means not select. there are totally 2^n ways
-// if there is no duplicate numbers in the array
-
-// when there are duplicate numbers, we will need to rely on set to eliminate duplicates

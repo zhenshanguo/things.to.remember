@@ -1,3 +1,17 @@
+/*
+Given a matrix of m x n elements (m rows, n columns), return all elements of the matrix in spiral order.
+
+For example,
+Given the following matrix:
+
+[
+ [ 1, 2, 3 ],
+ [ 4, 5, 6 ],
+ [ 7, 8, 9 ]
+]
+You should return [1,2,3,6,9,8,7,4,5].
+*/
+
 import java.util.Arrays;
 import java.lang.Math;
 import java.util.List;
@@ -22,6 +36,7 @@ public class Main
                 rt.add(matrix[x][endy]);
             }
             // 如果行或列遍历完，则退出循环
+            /* this is not necessary */
             if (startx == endx || starty == endy) {
                 break;
             }
