@@ -5,25 +5,84 @@ public TreeNode sortedListToBST(ListNode head) {
     if(head == null)
         return null;
     ListNode cur = head;
+    
+    // count the number of nodes
     int count = 0;
     while(cur!=null)
     {
         cur = cur.next;
         count++;
     }
+    
+    //define list to hold the head
     ArrayList<ListNode> list = new ArrayList<ListNode>();
     list.add(head);
+    
+    // call recursive helper function 
     return helper(list,0,count-1);
 }
+
+// here the l, and r are not referring anything, purely for counting purpose and ending condition
 private TreeNode helper(ArrayList<ListNode> list, int l, int r)
 {
     if(l>r)
         return null;
     int m = (l+r)/2;
+    
+    // the ordering of below is quite important, as the head pointer in parameter list keep changing
+    // and the order should be left, root and right. 
     TreeNode left = helper(list,l,m-1);
     TreeNode root = new TreeNode(list.get(0).val);
     root.left = left;
+    
+    // remember to move head pointer to its next node
     list.set(0,list.get(0).next);
     root.right = helper(list,m+1,r);
     return root;
 }
+
+/* another way to use fast and slow pointer to do the tree construction, I prefer this method */
+
+	ListNode cutAtMid(ListNode head) {
+
+        if (head == null) {
+            return null;
+        }
+
+        ListNode fast = head;
+        /* the slow pointer points to the mid node when the fast hit the end of the list */
+        ListNode slow = head;
+        /* preSlow is to remember the previous node of the slow node, and we need to terminate
+           it when fast hit end of the list, so that the head pointer is pointing to first half 
+           of the original list, not the whole list */
+        ListNode preSlow = head; 
+
+        while (fast != null && fast.next != null) {
+            preSlow = slow; // set preSlow to previous slow node before moving slow to its next
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        preSlow.next = null; // this is REALLY IMPORTANT!!!
+        return slow;
+    }
+
+    public TreeNode sortedListToBST(ListNode head) {
+
+        if (head == null) {
+            return null;
+        }
+
+        if (head.next == null) {
+            return new TreeNode(head.val);
+        }
+
+        ListNode mid = cutAtMid(head);
+
+		// the ordering below doesn't matter here
+        TreeNode root = new TreeNode(mid.val);
+        root.left = sortedListToBST(head);
+        root.right = sortedListToBST(mid.next);
+
+        return root;
+    }
