@@ -1,0 +1,1 @@
+1. Add Binary: using string.atChar(index), keep a variable for carryon bit/digit, merging the 2 numbers in a loop and append the leftover of the longer one

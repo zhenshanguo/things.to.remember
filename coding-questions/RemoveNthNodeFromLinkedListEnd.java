@@ -60,7 +60,8 @@ public class Main
             first = first.next;
             
             /* in case the first pointer is null, like n equals or bigger than the length 
-            of the list, we delete the head of the list */
+            of the list, we delete the head of the list. if we don't do the check here, we
+            will need a pre node to delete the head node in those cases */
             if (first == null) {
                 return head.next;
             }

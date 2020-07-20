@@ -1,0 +1,3 @@
+1. add 2 linked list: similar to merge 2 linked list, keep one variable for carry, get the value of each list, add them, the sum/10 will be he carry on, and sum%10 will be the sum node's value, keep looping till end of each link and carry is zero
+2. bubble sort linked list: need to maintain a flag indicating if there is node swapping in previous looping. if yes, we need to iterate the list again until there is no swapping. 
+3. delete a node from a linked list: since only the node to be deleted is given, we can't use pre node and next node to delete it. but we can copy its next node's value over and point its next to its next's next. 

@@ -1,3 +1,5 @@
+/* bubble sort linked list */
+
 import java.util.*;
 import java.lang.*;
 
@@ -91,5 +93,4 @@ public class Main
 	    ListNode rt = test.bubbleSort(l11);
 	    System.out.println(test.printList(rt));
 	}
-	
 }
