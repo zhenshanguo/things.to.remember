@@ -1,0 +1,1 @@
+1. group anagram: first thing is to break each string into char array and sort them, then convert it back to string and use it as a key in the map, whose value will be the list of array indices or list of strings with the same anagram. finally, we sort each map value by defining a Comparator on String and add it to the result.

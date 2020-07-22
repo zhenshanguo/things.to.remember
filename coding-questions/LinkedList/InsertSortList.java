@@ -29,7 +29,7 @@ public class Main
 
         while(current != null)
         {
-            /* when new current node is smaller than previous pre node, we need to reset pre
+            /* when new current node is smaller than previous node, pre, we need to reset pre
                node to the dummy node, meaning, we will do the check from the head again because
                we can't traverse the list backward */
             if(prev.val > current.val)
@@ -54,7 +54,8 @@ public class Main
         return dummy.next;
     }
     
-    /* this one is easier to understand, but not as efficient as the above one */
+    /* this one is easier to understand, but not as efficient as the above one because it
+       always search from the head of list for the insertion point */
     public ListNode insertionSortList2(ListNode head)
     {
         // Initialize partially sorted list

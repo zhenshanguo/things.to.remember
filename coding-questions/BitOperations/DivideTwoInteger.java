@@ -20,15 +20,25 @@ public class Main
 {
     
     public int divide(int dividend, int divisor) {
+    	//if divisor is zero, return Integer.MAX_VALUE
         if(divisor == 0)
         {
             return Integer.MAX_VALUE;
         }
+        
+        //check the negative flag. >>> is moving with sign bit for signed int. >> is not moving sign bit for signed int
         boolean isNeg = (dividend^divisor)>>>31 == 1;
+        
         int res = 0;
+        
+        /* if dividend is the the smallest integer, we will need to add advisor to dividend, so it will not overflow
+           when we take its absolute value later. to compensate, we need to increase res by 1 */
+           
         if(dividend == Integer.MIN_VALUE)
         {
             dividend += Math.abs(divisor);
+            
+            /* if divisor is -1 and dividend is minimum value, we simply return maximum to avoid overflow */
             if(divisor == -1)
             {
                 return Integer.MAX_VALUE;

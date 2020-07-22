@@ -1,0 +1,1 @@
+1. dividing 2 integers: first thing is to check boundary of both dividend and divisor on both ends (0 and minimum). second we first need to find the largest power of 2 for the divisor that is smaller than the dividend. then we loop backward and check if remaining dividend can subtract current divisor till the power of 2 get to 1. 
