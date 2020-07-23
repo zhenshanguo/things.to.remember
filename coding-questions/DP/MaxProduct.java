@@ -1,4 +1,15 @@
-/* 这道题跟Maximum Subarray模型上和思路上都比较类似，还是用一维动态规划中的“局部最优和全局最优法”。这里的区别是维护一个局部最优不足以求得后面的全局最优，这是由于乘法的性质不像加法那样，累加结果只要是正的一定是递增，乘法中有可能现在看起来小的一个负数，后面跟另一个负数相乘就会得到最大的乘积。不过事实上也没有麻烦很多，我们只需要在维护一个局部最大的同时，在维护一个局部最小，这样如果下一个元素遇到负数时，就有可能与这个最小相乘得到当前最大的乘积和，这也是利用乘法的性质得到的。代码如下
+/*
+/* Find the contiguous subarray within an array (containing at least one number) which has the largest product.
+
+For example, given the array [2,3,-2,4],
+the contiguous subarray [2,3] has the largest product = 6.
+*/
+
+/* 这道题跟Maximum Subarray模型上和思路上都比较类似，还是用一维动态规划中的“局部最优和全局最优法”。
+这里的区别是维护一个局部最优不足以求得后面的全局最优，这是由于乘法的性质不像加法那样，累加结果只要是正的一定是递增，
+乘法中有可能现在看起来小的一个负数，后面跟另一个负数相乘就会得到最大的乘积。不过事实上也没有麻烦很多，
+我们只需要在维护一个局部最大的同时，在维护一个局部最小，这样如果下一个元素遇到负数时，就有可能与这个最小相乘得到当前最大的乘积和，
+这也是利用乘法的性质得到的。代码如下
 */
 
 import java.util.Arrays;
@@ -32,11 +43,8 @@ public class Main
         return global;
     }
     
-/* Find the contiguous subarray within an array (containing at least one number) which has the largest product.
 
-For example, given the array [2,3,-2,4],
-the contiguous subarray [2,3] has the largest product = 6.
-
+/*
 LeetCode第53题Maximum Subarray是求连续和最大的子数组，本题是求连续乘积最大的子数组。
 
 在解法上是一样的，只是在求和时，是负就舍弃。但是在乘积中，因为负数*负数=正数，所以连续乘积为负数时，并不能舍弃这个数，因为如果数组的元素是负数，它可能成为乘积最大的数。
@@ -50,13 +58,13 @@ LeetCode第53题Maximum Subarray是求连续和最大的子数组，本题是求
         for (int i = 1; i < nums.length; i++) {
             positive *= nums[i];
             negative *= nums[i];
-            if (positive < negative) {
+            if (positive < negative) { // positive should always be bigger than negative
                 int t = positive;
                 positive = negative;
                 negative = t;
             }
-            positive = Math.max(positive, nums[i]);
-            negative = Math.min(negative, nums[i]);
+            positive = Math.max(positive, nums[i]); // if there is zero before num[i], num[i] could be bigger than previous positive
+            negative = Math.min(negative, nums[i]); // if there is zero before num[i], and num[i] is negative, num[i] will be smaller
             max = Math.max(max, positive);
         }
         return max;
