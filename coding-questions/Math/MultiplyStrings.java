@@ -24,45 +24,54 @@ You must not use any built-in BigInteger library or convert the inputs to intege
 算法中不需要额外空间，只需要维护一个进位变量即可，所以空间复杂度是O(1)
 */
 
-import java.util.Arrays;
-import java.lang.Math;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.*;
+import java.lang.*;
 
 public class Main
 {
     
     public String multiply(String num1, String num2) {
+        // checking for edge cases
         if(num1 == null || num2 == null || num1.length()==0 || num2.length()==0)
             return "";
         if(num1.charAt(0)=='0')
             return "0";
         if(num2.charAt(0)=='0')
             return "0";
+            
+        int m = num1.length(), n=num2.length();
         StringBuilder res = new StringBuilder();
         int num = 0;
-        for(int i=num1.length()+num2.length();i>0;i--)
+        
+        /* here i is not the index of an array, it's just like a counter of number of digits of the result
+           or the natural index (starting with 1) of the digit, we first assume there are (m+n) digits in result 
+           we calculate from the first digit */
+        for(int r=1; r<=m+n; r++)
         {
-            for(int j=Math.min(i-1,num1.length());j>0;j--)
+        	/* i is the 'natural' index of digit from array num1. and j is the natural index of num2, still they
+        	   are not array index, they are the digit index starting from 1 */
+            for(int i=1; i<=Math.min(r, m); i++)
             {
-                if(i-j<=num2.length())
+                // i+j = r+1
+                int j = r + 1 - i;
+                System.out.println(String.format("i=%s, j=%s, i-j=%s", i, j, i-j));
+                if(j<=n)
                 {
-                    num += (int)(num1.charAt(j-1)-'0')*(int)(num2.charAt(i-1-j)-'0');
+                    // here we need to convert the natural digit index to array index
+                    num += (int)(num1.charAt(m -i)-'0')*(int)(num2.charAt(n-j)-'0');
                 }
+                System.out.println(String.format("num=%s, res=%s", num, res.toString()));
             }
-            if(i!=1 || num>0)
+            if(r!=m + n || num>0)
                 res.append(num%10);
             num = num/10;
         }
-        System.out.println(res.reverse().toString());
+        /* the reason we reveres the string is because we calculate the last digit first */
         return res.reverse().toString();
     }
 	public static void main(String[] args) {
 	    Main test = new Main();
-	    test.multiply("5","72");
+	    String res = test.multiply("456","9987");
+	    System.out.println(res);
 	}
 }

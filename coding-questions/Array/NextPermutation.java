@@ -24,7 +24,7 @@ public class Main
         /* find the first number from the second rightest that is smaller than its next to the right 
            this is where we can do swap to get the number serial "bigger". or, we can think it a different
            way, we are looking the first number from the right that decreases, and from its next number to the 
-           right end, they are ascending */
+           right end, they are descending */
         int p = 0;
         for (int i = nums.length - 2; i >= 0; i--) {
             if (nums[i] < nums[i + 1]) {
