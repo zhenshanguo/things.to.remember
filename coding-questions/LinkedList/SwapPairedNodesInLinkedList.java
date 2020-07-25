@@ -40,6 +40,7 @@ public class Main
         // p2 is the first node of the pair
         ListNode p2 = head;
 
+		// we actually swap p1.next with p2.next
         while (p2 != null && p2.next != null) {
             ListNode nextStart = p2.next.next; // the first node of the next pair
             p2.next.next = p2; //point the second node's next to the first node of current pair

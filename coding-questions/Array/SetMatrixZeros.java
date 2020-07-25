@@ -48,7 +48,7 @@ public class Main
             }
         }
         // 对于第一列，为0，则将所在行变成0
-        for (int i = 1; i < mx; i++) {
+        for (int i = 1; i < mx; i++) { // here i starts from 1, later when checking on first row, it starts from 0
             if (matrix[i][0] == 0) {
                 for (int j = 0; j < my; j++) {
                     matrix[i][j] = 0;

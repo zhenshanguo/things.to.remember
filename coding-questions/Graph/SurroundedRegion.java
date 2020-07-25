@@ -1,8 +1,12 @@
-/* 这道题是要求出最长的整数连续串。我们先说说简单直接的思路，就是先排序，然后做一次扫描，记录当前连续串长度，如果连续串中断，则比较是否为当前最长连续串，并且把当前串长度置0。这样时间复杂度是很明确，就是排序的复杂度加上一次线性扫描。如果不用特殊的线性排序算法，复杂度就是O(nlogn)。
-其实这个题看起来是数字处理，排序的问题，但是如果要达到好的时间复杂度，还得从图的角度来考虑。思路是把这些数字看成图的顶点，而边就是他相邻的数字，然后进行深度优先搜索。通俗一点说就是先把数字放到一个集合中，拿到一个数字，就往其两边搜索，得到包含这个数字的最长串，并且把用过的数字从集合中移除（因为连续的关系，一个数字不会出现在两个串中）。最后比较当前串是不是比当前最大串要长，是则更新。如此继续直到集合为空。如果我们用HashSet来存储数字，则可以认为访问时间是常量的，那么算法需要一次扫描来建立集合，第二次扫描来找出最长串，所以复杂度是O(2*n)=O(n)，空间复杂度是集合的大小，即O(n)
-————————————————
-版权声明：本文为CSDN博主「Code_Ganker」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
-原文链接：https://blog.csdn.net/linhuanmars/article/details/22964467
+/* 这个题目用到的方法是图形学中的一个常用方法：Flood fill算法，其实就是从一个点出发对周围区域进行目标颜色的填充。
+背后的思想就是把一个矩阵看成一个图的结构，每个点看成结点，而边则是他上下左右的相邻点，然后进行一次广度或者深度优先搜索。
+接下来我们看看这个题如何用Flood fill算法来解决。首先根据题目要求，边缘上的'O'是不需要填充的，所以我们的办法是对上下左右边缘做Flood fill算法，
+把所有边缘上的'O'都替换成另一个字符，比如'#'。接下来我们知道除去被我们换成'#'的那些顶点，剩下的所有'O'都应该被替换成'X'，
+而'#'那些最终应该是还原成'O'，如此我们可以做最后一次遍历，然后做相应的字符替换就可以了。复杂度分析上，我们先对边缘做Flood fill算法，
+因为只有是'O'才会进行，而且会被替换成'#'，所以每个结点改变次数不会超过一次，因而是O(m*n)的复杂度，最后一次遍历同样是O(m*n)，
+所以总的时间复杂度是O(m*n)。空间上就是递归栈（深度优先搜索）或者是队列（广度优先搜索）的空间，同时存在的空间占用不会超过O(m+n)
+（以广度优先搜索为例，每次队列中的结点虽然会往四个方向拓展，但是事实上这些结点会有很多重复，假设从中点出发，可以想象最大的扩展不会超过一个菱形，
+也就是n/2*2+m/2*2=m+n，所以算法的空间复杂度是O(m+n)）。代码如下：
 */
 
 import java.util.Arrays;
@@ -18,13 +22,19 @@ public class Main
 {
     
     public void solve(char[][] board) {
+    	
+    	// check for edge cases
         if(board==null || board.length<=1 || board[0].length<=1)
             return;
+        
+        // check the first and last row
         for(int i=0;i<board[0].length;i++)
         {
             fill(board,0,i);
             fill(board,board.length-1,i);
         }
+        
+        // check the first and last column
         for(int i=0;i<board.length;i++)
         {
             fill(board,i,0);
@@ -57,28 +67,38 @@ public class Main
             return;
         board[i][j] = '#';
         LinkedList<Integer> queue = new LinkedList<Integer>();
-        int code = i*board[0].length+j;
+        int code = i*board[0].length+j; // using code so we dont need to save x and y
         queue.offer(code);
         while(!queue.isEmpty())
         {
             code = queue.poll();
+            
+            // decoding back to x and y
             int row = code/board[0].length;
             int col = code%board[0].length;
+            
+            // check the element above current element, if zero, set it to # and push it to the queue
             if(row>0 && board[row-1][col]=='O')
             {
                 queue.offer((row-1)*board[0].length+col);
                 board[row-1][col]='#';
             }
+            
+            // check the element below current element, if zero, set it to # and push it to the queue
             if(row<board.length-1 && board[row+1][col]=='O')
             {
                 queue.offer((row+1)*board[0].length+col);
                 board[row+1][col]='#';
             }
+            
+            // check the element to the left of current element, if zero, set it to # and push it to the queue
             if(col>0 && board[row][col-1]=='O')
             {
                 queue.offer(row*board[0].length+col-1);
                 board[row][col-1]='#';
             }
+            
+            // check the element to the right of current element, if zero, set it to # and push it to the queue
             if(col<board[0].length-1 && board[row][col+1]=='O')
             {
                 queue.offer(row*board[0].length+col+1);

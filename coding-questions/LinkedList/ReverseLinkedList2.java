@@ -35,6 +35,7 @@ public class Main
             return head;
         }
 
+		// the reason we need this fake head is for case where m = 1
         ListNode fakeHead = new ListNode(-1);
         fakeHead.next = head;
 

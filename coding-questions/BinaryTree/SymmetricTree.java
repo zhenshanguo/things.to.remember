@@ -27,6 +27,8 @@ public boolean isSymmetric(TreeNode root) {
         return false;
     LinkedList<TreeNode> q1 = new LinkedList<TreeNode>();
     LinkedList<TreeNode> q2 = new LinkedList<TreeNode>();
+    
+    // put left and right into 2 queues as we will traverse them differently
     q1.add(root.left);
     q2.add(root.right);
     while(!q1.isEmpty() && !q2.isEmpty())
@@ -34,17 +36,24 @@ public boolean isSymmetric(TreeNode root) {
         TreeNode n1 = q1.poll();
         TreeNode n2 = q2.poll();
         
+        // checking root values
         if(n1.val != n2.val)
             return false;
+            
+        // checking on left and right
         if(n1.left == null && n2.right != null || n1.left != null && n2.right == null)
             return false;
         if(n1.right == null && n2.left != null || n1.right != null && n2.left == null)
             return false;
+            
+        // put n1.left and n2.right into queues
         if(n1.left != null && n2.right != null)
         {
             q1.add(n1.left);
             q2.add(n2.right);
         }
+        
+        // put n1.right and n2.left into queues
         if(n1.right != null && n2.left != null)
         {
             q1.add(n1.right);
