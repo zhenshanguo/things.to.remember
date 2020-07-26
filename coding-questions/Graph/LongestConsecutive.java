@@ -40,6 +40,7 @@ public class Main
         }
         while(!set.isEmpty())
         {
+        	// use an iterator to go through the set
             Iterator iter = set.iterator();
             int item = (Integer)iter.next();
             set.remove(item);

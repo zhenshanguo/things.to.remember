@@ -1,1 +1,2 @@
 1. multiply 2 strings: for 2 string with m digits and n digits, the result could be (m+n) digits or (m+n-1) digits. for digit i in the result, it's m(i)*n(1) + m(i-1)*n(2) + ... +m(1)*n(i). remember to check edge cases and also make sure array indices are all within the boundary
+2. find sqrt root of a number: use binary search. check edge cases. first need to define the search boundary, left=0 and right is x/2 +1. be cautious on the ending condition

@@ -1,0 +1,86 @@
+if [ "${confirm}" = "YES" ]; then
+  git checkout master
+  which jq
+  
+  echo environment: ${environment1}
+  echo region: ${region}
+  echo featureFlags: ${featureFlags}
+  
+  IFS=',' read -ra flags <<< "${featureFlags}"
+  echo "number of features: ${#flags[@]}"
+  if [ "${#flags[@]}" = "0" ]; then
+    echo "You must select at least one feature flag to enable"
+    exit 1
+  fi
+  
+  enableCommand="sed"
+  disableCommand="sed"
+  
+  for i in "${flags[@]}"
+  do
+	enableCommand="$enableCommand -e 's/.*$i=.*/$i=true/'"
+    disableCommand="$disableCommand -e 's/.*$i=.*/$i=false/'"
+  done
+  
+  echo $enableCommand
+  echo $disableCommand
+  
+  
+  fileToEnable=accountservice.properties
+  fileToDisable=accountservice.properties
+  
+  # IKS-PRF
+  if [ "${environment1}" = "PRF" ]; then
+    if [ "${region}" = "EAST" ]; then 
+      fileToEnable=accountservice-prf-use2.properties
+      fileToDisable=accountservice-prf.properties
+    elif [ "${region}" = "WEST" ]; then 
+      fileToEnable=accountservice-prf.properties
+      fileToDisable=accountservice-prf-use2.properties
+    fi
+      
+  # IKS-PRD
+  elif [ "${environment1}" = "PRD" ]; then
+    if [ "${region}" = "EAST" ]; then  
+      fileToEnable=accountservice-prd-use2.properties
+      fileToDisable=accountservice-prd.properties
+    elif [ "${region}" = "WEST" ]; then 
+      fileToEnable=accountservice-prd.properties
+      fileToDisable=accountservice-prd-use2.properties
+    fi
+  fi
+  
+  enableFlags="$enableCommand $fileToEnable > $fileToEnable.tmp"
+  echo $enableFlags
+  eval $enableFlags
+  mv $fileToEnable.tmp $fileToEnable
+    
+  disableFlags="$disableCommand $fileToDisable > $fileToDisable.tmp"
+  echo $disableFlags
+  eval $disableFlags
+  mv $fileToDisable.tmp $fileToDisable
+
+  
+  #----------------#
+  # COMMIT CHANGES #
+  #----------------#
+  
+  echo $GIT_PWD > /tmp/gitcredfile
+  trap "shred -n 25 -u -z /tmp/gitcredfile" EXIT
+  export GIT_USER=$(echo $GIT_PWD | sed 's/^.*\/\///' | sed 's/:.*//')
+  echo $GIT_USER
+  git config --global user.name "ibpjenkins"
+  git config --global user.email "ibpjenkins@intuit.com"
+  git config --global credential.helper "store --file=/tmp/gitcredfile"
+  
+  git status
+  
+  git commit -am "Changing ${featureFlags} to true in ${environment1} in the ${region} "
+  
+  git push --verbose
+  
+  
+else
+	echo "You must confirm you want to proceed before this job will execute!"
+    exit 1
+fi

@@ -10,15 +10,24 @@ public ArrayList<TreeNode> generateTrees(int n) {
 private ArrayList<TreeNode> helper(int left, int right)
 {
     ArrayList<TreeNode> res = new ArrayList<TreeNode>();
+    
+    // define returning condition
     if(left>right)
     {
         res.add(null);
         return res;
     }
+    
+    // loop through all cases where root is at i
     for(int i=left;i<=right;i++)
     {
+    	// find all possible trees with elements from left to i-1
         ArrayList<TreeNode> leftList = helper(left,i-1);
+        
+        // find all possible trees with elements from i to right
         ArrayList<TreeNode> rightList = helper(i+1,right);
+        
+        // construct all trees with root at i and add them to the result
         for(int j=0;j<leftList.size();j++)
         {
             for(int k=0;k<rightList.size();k++)
