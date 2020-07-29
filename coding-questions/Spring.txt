@@ -1,0 +1,42 @@
+1. CSRF is an attack that tricks the victim into submitting a malicious request. It inherits the identity and privileges of the victim to perform an undesired function on the victim’s behalf
+
+2. design patterns used in spring framework:
+Singleton Pattern: Singleton-scoped beans
+Factory Pattern: Bean Factory classes
+Prototype Pattern: Prototype-scoped beans
+Adapter Pattern: Spring Web and Spring MVC
+Proxy Pattern: Spring Aspect Oriented Programming support
+Template Method Pattern: JdbcTemplate, HibernateTemplate, etc.
+Front Controller: Spring MVC DispatcherServlet
+Data Access Object: Spring DAO support
+Model View Controller: Spring MVC
+
+3. Scope prototype means that every time you call for an instance of the Bean, Spring will create a new instance and return it
+
+4. @RequestMapping annotation in Spring – discussing a simple use case, the mapping of HTTP headers, binding parts of the URI with @PathVariable and working with URI parameters and the @RequestParam annotation.
+
+5. The main difference between the @Controller and @RestController annotations is that the @ResponseBody annotation is automatically included in the @RestController
+
+6. According to the official Spring documentation, @Component is a generic stereotype for any Spring-managed component. @Repository, @Service, and @Controller are specializations of @Component for more specific use cases, for example, in the persistence, service, and presentation layers, respectively
+
+7. The @EnableWebMvc annotation's purpose is to enable Spring MVC via Java configuration
+
+8. 
+The @RequestBody annotation, used as a handler method parameter, binds the HTTP Request body to a transfer or a domain object
+When we use the @ResponseBody annotation on a handler method in the Spring MVC controller, it indicates that we'll write the return type of the method directly to the HTTP response body
+
+9. There are two distinct ways to configure Transactions – with annotations or by using Aspect Oriented Programming (AOP)
+
+10. Aspects enable the modularization of cross-cutting concerns such as transaction management that span multiple types and objects by adding extra behavior to already existing code without modifying affected classes
+Aspect: a class that implements cross-cutting concerns, such as transaction management
+Advice: the methods that get executed when a specific JoinPoint with matching Pointcut is reached in the application
+Pointcut: a set of regular expressions that are matched with JoinPoint to determine whether Advice needs to be executed or not
+JoinPoint: a point during the execution of a program, such as the execution of a method or the handling of an exception
+
+11. weaving is a process that links aspects with other application types or objects to create an advised object. Spring AOP, like other pure Java AOP frameworks, performs weaving at runtime.
+
+12. Reactive programming is about non-blocking, event-driven applications that scale with a small number of threads
+increased utilization of computing resources on multicore and multi-CPU hardware
+and increased performance by reducing serialization
+reactive systems, which are message-driven. Thus, using reactive programming does not mean we're building a reactive system, which is an architectural style.
+

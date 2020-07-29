@@ -1,0 +1,44 @@
+1. access modifier: 
+private: same class
+default: same package
+protected: same package or subclass
+public: all
+
+2. string pool is in heap memory
+
+3. yield() transfers the currently running thread to a runnable state and also allows the other threads to execute. yield() is a static method, it does not release any lock
+
+4. Threads run in shared memory spaces, but processes run in separate memory spaces.
+
+5. Although it can be called on any Java object, the wait() method can only be called from a synchronized block.
+
+6. The time for which the thread needs to enter the sleep state is mentioned inside the braces of the sleep() method. It is a static method
+
+7. Serial Garbage Collector– Using only a single thread for garbage collection, freezes all threads. 
+Parallel Garbage Collector– uses multiple threads for garbage collection, default one also freezes all threads. 
+CMS Garbage Collector– Short for Concurrent Mark Sweep, uses multiple threads for scanning the heap memory for marking instances for eviction, followed by sweeping the marked instances
+G1 Garbage Collector – Used for large heap memory areas. works by separating the heap memory into multiple regions and then executing garbage collection in them in parallel
+
+8. Finalize: The finalize method performs the clean up just before the object is garbage collected
+Finally: Any code inside the final block will be executed, irrespective of whether an exception is handled or not.
+
+9. The value stored in a volatile variable is not read from the thread's cache memory but from the main memory. Volatile variables are primarily used during synchronization.
+
+10. The value stored in a volatile variable is not read from the thread's cache memory but from the main memory. Volatile variables are primarily used during synchronization
+
+11. OutOfMemoryError exception: 
+Holding objects for too long
+Trying to process too much data at the same time
+Using a third-party library that caches strings
+Using an application server that doesn't perform a memory cleanup post the deployment
+When a native allocation can't be satisfied
+
+11. When the method main() is not made static, the compiler throws an error because the main() is called by the JVM before any objects are made, and only static methods can be directly invoked via the class
+main: JVM searches this method when starting the execution of any program, with the particular signature only
+
+12. 
+Boxing: The concept of putting a primitive value inside an object is called boxing.
+Unboxing: Getting the primitive value from the object.
+Autoboxing: Assigning a value directly to an integer object.
+Auto unboxing: Getting the primitive value directly into the integer object.
+
