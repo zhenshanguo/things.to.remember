@@ -42,3 +42,16 @@ Unboxing: Getting the primitive value from the object.
 Autoboxing: Assigning a value directly to an integer object.
 Auto unboxing: Getting the primitive value directly into the integer object.
 
+13. memory leaks:
+Memory Leak Through static Fields: Minimize the use of static variables. When using singletons, rely upon an implementation that lazily loads the object instead of eagerly loading
+Through Unclosed Resources: Always use finally block to close resources. The code (even in the finally block) that closes the resources should not itself have any exceptions. When using Java 7+, we can make use of try-with-resources block
+Improper equals() and hashCode() Implementations: As a rule of thumb, when defining new entities, always override equals() and hashCode() methods. It's not just enough to override, but these methods must be overridden in an optimal way as well
+Inner Classes That Reference Outer Classes: If the inner class doesn't need access to the containing class members, consider turning it into a static class
+Memory leaks with ThreadLocals: It's a good practice to clean-up ThreadLocals when they're no longer used — ThreadLocals provide the remove() method, which removes the current thread's value for this variable. It's even better to consider ThreadLocal as a resource that needs to be closed in a finally block just to make sure that it is always closed, even in the case of an exception
+
+14. An application or system class loader loads our own files in the classpath. Extension class loaders load classes that are an extension of the standard core Java classes. A bootstrap or primordial class loader is the parent of all the others.the bootstrap class loader is written in native code, not Java – so it doesn't show up as a Java class
+If the class isn't already loaded, it delegates the request to the parent class loader. This process happens recursively. Eventually, if the parent class loader doesn’t find the class, then the child class will look for classes in the file system itself
+Class loaders follow the delegation model where on request to find a class or resource, a ClassLoader instance will delegate the search of the class or resource to the parent class loader. Let's say we have a request to load an application class into the JVM. The system class loader first delegates the loading of that class to its parent extension class loader which in turn delegates it to the bootstrap class loader. Only if the bootstrap and then the extension class loader is unsuccessful in loading the class, the system class loader tries to load the class itself.
+As a consequence of the delegation model, it's easy to ensure unique classes as we always try to delegate upwards
+children class loaders are visible to classes loaded by its parent class loaders.
+For instance, classes loaded by the system class loader have visibility into classes loaded by the extension and Bootstrap class loaders but not vice-versa

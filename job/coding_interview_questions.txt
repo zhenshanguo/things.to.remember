@@ -1,4 +1,6 @@
-1. given a 2 dimensional string array, like [["12", "software design"],["22", "economics"],["12", "economics"],["33", "software design"], ["31", "math"], return student pairs with common courses, like [{"12, 33": ["software design"]}, {"12, 22": ["ecomomics"]}, {"22,33": []}, {"12,31": []}, {"22,31": []}, {"33,31": []}]
+1. Roblox: given a 2 dimensional string array, like [["12", "software design"],["22", "economics"],["12", "economics"],["33", "software design"], ["31", "math"], return student pairs with common courses, like [{"12, 33": ["software design"]}, {"12, 22": ["ecomomics"]}, {"22,33": []}, {"12,31": []}, {"22,31": []}, {"33,31": []}]
 
-2. given a list of projects with their dependencies respectively, provide a project compiling sequence so that there is no dependency issue. i.e. a->b, b->c,d, d->e, c->f,g. the compiling sequence could be f,g,e,d,c,b,a, but not f,g,e,d,b,c,a
+2. DoorDash: given a list of projects with their dependencies respectively, provide a project compiling sequence so that there is no dependency issue. i.e. a->b, b->c,d, d->e, c->f,g. the compiling sequence could be f,g,e,d,c,b,a, but not f,g,e,d,b,c,a
+
+3. Sage: merge 2 list of intergers, and one db query involves left join, group by, order by. 
 
