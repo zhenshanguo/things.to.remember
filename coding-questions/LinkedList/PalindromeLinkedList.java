@@ -63,7 +63,7 @@ public class Main
 		   number of nodes in the list. when there are even number of nodes, both head and slow will 
 		   reach to null */
 		   
-        while (head != slow) {
+        while (head != tail) {
             if (head.val != tail.val) {
                 return false;
             }

@@ -45,19 +45,32 @@ public class Main
             }
             res++;
         }
+        
+        /* if divisor is the minimum value, the result should always be zero */
         if(divisor == Integer.MIN_VALUE)
         {
             return res;
         }
+        
+        /* take absolute value of both dividend and divisor to make the following processing easier */
         dividend = Math.abs(dividend);
         divisor = Math.abs(divisor);
+        
+        /* variable digit is the 2's power times of divisor. ie. digit equaling 2 
+        means current divisor is 4 times of its original value */
         int digit = 0;
+        
+        /* keep times divisor by 2 till it reaches its possible largest */
         while(divisor <= (dividend>>1))
         {
             divisor <<= 1;
             digit++;
             System.out.println(String.format("dividend=%s, divisor=%s, digit=%s, res=%s", dividend, divisor, digit, res));
         }
+        
+        /* loop backward on digit till it's zero, each time, dividend minus current divisor, 
+        adds 2's power of digit to the result, and then decrease digit by 1, and then divides 
+        divisor by 2 */
         while(digit>=0)
         {
             if(dividend>=divisor)
