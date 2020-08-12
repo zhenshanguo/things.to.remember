@@ -11,7 +11,10 @@ class Solution {
                 map.put(arr[0], l);
             }
         }
+        // visited is to record which node has been deep first checked before
         boolean[] visited = new boolean[numCourses];
+        
+        // recStack is to record if a node has already been in the path for current deep first check
         boolean[] recStack = new boolean[numCourses];
         for (int i = 0; i < numCourses; i++) {
             if (isCyclic(i, visited, recStack, map)) {
@@ -34,7 +37,7 @@ class Solution {
                 return true;
             }
         }
-        recStack[i] = false; 
+        recStack[i] = false; // THIS IS QUITE IMPORTANT TO RESET NODE i when the deep first check is done for i. 
   
         return false;
     }

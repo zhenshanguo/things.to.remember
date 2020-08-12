@@ -1,0 +1,118 @@
+Coursera panel interview: 
+
+coding interview (string questions):
+
+	1. valid palindrome: keep 2 pointers, one from left and one from right, skip special characters and return false when they are not same
+	
+	2. Implement strStr(): using brute-force, starting from left, character by character compare, if not match, move the start pointer to next in haystack
+	
+	3. String to Integer (atoi): the important part is for edge cases, null/empty check, remove leading white spaces, check sign character, check overflow before do calculation in each iteration
+	
+	4. Add Binary: edge case checking, start adding from right, keep a variable for carry, and use StringBuilder.insert() and Character.forDigit()
+	
+	5. Longest Palindromic Substring: brute-force or DP f(i,j)= true when (i==j || (j==i+1 && s[i] == s[j]) || (j>x+1 && s[i] == s[j] && f(i+1, j-1)== true)), maintain a maxlen and and start variable for the palindrome start index
+	
+	6. Regular Expression Matching (. and *): using recursion, based on cases. define a function to match first char only. one thing to remember that we should never check the match on the '*'. 3 cases to check: a. either current first character is the last one in the pattern or its next char is not '*', so we call that first char matching function. b. next char is '*'. we can either ignore the '*' and match current char in s with the char after '*' in pattern or we loop and check each char after the current char in s with the char after '*' in pattern (let '*' match 1 ... n), the first char match func is called before moving to next char matching recursively
+	
+	7. Wildcard Matching (? and *): using recursion (a bit slow, but easy to understand). the important part is for '*'. we first move to the next char of '*' and ignore continuous '*', if there is no next char, we return true, otherwise recursively match it with current char in s, if match return true, otherwise, move to next char in s and do the recursive match. if current char in p is not '*', just do straight one-char match, and decide to continue or return false
+	
+	8. Longest Common Prefix: straightforward, compare all strings char by char, when there is one not matching or it hits the end of one string, return
+	
+	9. Valid Number: the easiest way is to use regular expression to match. otherwise, there are too many cases to check. an infinite statemachine helps make the code decent
+	
+	10. Integer to Roman: define a list of denominator starting from the biggest, remember to add the 2-char ones.
+	
+	11. Roman to Integer: keep adding the value of each char to the result. in case the current char denotes a bigger value than its previous one, then decrease the result by 2*previous.
+	
+	12. Count and Say: looping through the string and find the char different from the starting char, then append the number and the starting char to a stringbuilder and return the string.
+	
+	13. Anagrams: use String.toCharArray() to break a string into a char array and then sort it and convert it to a string, using a map to keep the list of strings with the same set of chars. 
+	
+	14. Valid Anagram: use 1 int[] of size 26 to represent number of each letter in each of the 2 strings. when it shows in string a, increase the array element, when it shows in b, decrease the same element. at last, check if all element is 0 in the array
+	
+	15. Simplify Path: using a stack. break the string into a string array by '/'. go through the array, for empty or ".", ignore it. for "..", if stack is not empty, pop it, and otherwise, push to the stack. at the end, using a string builder, for each string in the stack, append '/' and the string. if the final string builder is empty at the end, return "/"
+	
+	16. Length of Last Word: starting from the right of the string, searching for the first alphabetic char, mark its index, and then continue to search for the first non-alphabetic char, and return the distance from the first alphabetic char
+	
+	17. Isomorphic Strings: using map to keep the mapping between chars from 2 strings. and compare one by one. use 2 maps to make sure the mapping is one-to-one, instead of many-to-one. 
+	
+	18. Word Pattern: similar to isomorphic strings, we need 2 maps to keep the char to string and string to char map
+	
+	19. Valid Parentheses: using a stack, if current char is '(', '[', '{', push to stack, otherwise, check if it's one of ')', ']', '}' and also match the stack's top (using peek), if not, return false. at the end check if stack is empty. if not return false
+	
+	20. Longest Valid Parentheses: using a stack, and keep 2 variables, one for maxlen, and the other is the index of last ')', called last. when the current char is '(', push it to stack. if it's ')' and stack is empty, update variable last to the current index i. otherwise, pop the stack, and see if the stack is empty, if yes, recaculate the maxlen = i - last, if not, maxlen = i-stack.peek(). finally return maxlen
+	
+	21. Evaluate Reverse Polish Notation: using stack, if current char is number, push it to stack. if it is operator, pop out 2 items from stack and calculate the result, then push the result back to the stack. and finally return the stack's top
+	
+	22. Letter Combinations of a Phone Number: go through each digit in the string, for each digit, get the number of chars on it, m, increase the existing strings in the result list by m times (add m-1 copies), and then for each string in the list, attach
+	
+	23. Palindrome Partitioning: use recursion, starting from the beginning of the string, we break the string into 2, and check if the first one is a palindrome, if yes, we add the first part to the temp result and continue recursively with the second part of the string, REMEMBER, after return from the recursion, we should take the first part out of the temp result. when the beginning index hits the end of the string, we add the temp result to the result and return
+	
+	24. Text Justification: break the list strings into lines based on the line length. remember to count in spaces between words. for each line of words, using string builder to construct the formatted line, adjusting spaces between words. last line is special, we don't need to adjust spacing, just word following by space. 
+	
+
+System Design
+	1. RDBMS is more for situations where data integrity is absolutely paramount (financial applications, defense and security, private health information), highly structured data
+	Steps: 
+		Step 1: Outline use cases, constraints, and assumptions: Gather requirements and scope the problem
+		
+		Step 2: Create a high level design: Outline a high level design with all important components.
+		
+		Step 3: Design core components: Dive into details for each core component
+		
+		Step 4: Scale the design: Identify and address bottlenecks, given the constraints. Discuss potential solutions and trade-offs. Everything is a trade-off: Load balancer, Horizontal scaling, Caching, Database sharding
+			Back-of-the-envelope calculations: 
+			
+			DNS: name to ip mapping, some slight delay. NS record, MX record, A record, CNAME record. the delay can be mitigated by caching
+			CDN: a globally distributed network of proxy servers, serving content from locations closer to the user, especially for static content, files, photos, and videos. closer to user, and decrease load on app servers. cons: cost, update delay, and URL rewriting
+			Load Balancer: Preventing requests from going to unhealthy servers, Preventing overloading resources, Helping to eliminate a single point of failure, ssl termination and session persistent. Cons: could become performance bottle neck, could be a single point of failure, added more complexity. Amazon ELB, nginx, haproxy
+			Horizontal Scaling with help of Load Balancer: cost efficient, high availability
+			Reverse proxy (web server): Increased security, SSL termination, Compression, Caching, Static content, Increased scalability and flexibility. Cons: increased complexity, single point of failure. nginx and haproxy
+			Application layer: microservices, service discovery (etcd and zookeeper). Cons: added complexity of weaving up services and deployment coordination
+			Database: 
+				RDBMS: to scale a relational database: master-slave replication, master-master replication, federation, sharding, denormalization, and SQL tuning. 
+					master-slave: separate read and write, but need extra logic to promote slave to master. issues from replication (same to master-master): potential data loss, many replicas lead to replication lag. too many replication will decrease read performance on slaves, added complexity, and replication write is single threaded.
+					master-master: need a load balancer in front of it, bi-directional sync could cause issues or add delay to write. syncing getting difficult with more master nodes added in
+					Federation (or functional partitioning): separate dataset, smaller data volume (more can be cached), better performance and can scale independently. Cons: join will be difficult and but can be done through app or serverlink. added complexity in app/hardware. not suitable for complex schemas
+					Sharding: similar advantages as federation, increased throughput, increased availability and less replication, better performance. Cons: additional logic in app, un-balanced loads (consistent hashing can help), join is not straightforward. added complexity
+					Denormalization: improve read performance by adding redundant data to avoid joins. Cons: schema could be more complicated with more constraints to keep data consistent. write performance will be deduced. more duplicated data
+					SQL tuning (benchmark and profile): 
+						tighten up schema: 
+							Use CHAR instead of VARCHAR for fixed-length fields
+							Use TEXT for large blocks of text such as blog posts
+							Use INT for larger numbers up to 2^32 or 4 billion
+							Use DECIMAL for currency to avoid floating point representation errors
+							Avoid storing large BLOBS, store the location of where to get the object instead
+							VARCHAR(255) is the largest number of characters that can be counted in an 8 bit number, often maximizing the use of a byte in some RDBMS
+							Set the NOT NULL constraint where applicable to improve search performance
+						design good indices: 
+							Columns that you are querying (SELECT, GROUP BY, ORDER BY, JOIN) could be faster with indices
+							Cons: indices requires more space, cause slow writes
+						Avoid expensive joins: denormalization
+						Partition tables: 
+						Tune the query cache:
+				NoSQL: a collection of data items represented in a key-value store, document store, wide column store, or a graph database. Data is denormalized, and joins are generally done in the application code. Most NoSQL stores lack true ACID transactions and favor eventual consistency. (BASE and CAP theorem)
+					Key-value store (Hash table), Redis or Dynamo: high read/write performance backed by RAM/SSD. often used for simple data models or for rapidly-changing data, such as an in-memory cache layer. Since they offer only a limited set of operations, complexity is shifted to the application layer
+					Document store (key-value store with documents stored as values), Mongo, Dynamo or CouchBase: Document stores provide APIs or a query language to query based on the internal structure of the document itself. documents are organized by collections, tags, metadata, or directories. Although documents can be organized or grouped together, documents may have fields that are completely different from each other. MongoDB and CouchDB also provide a SQL-like language to perform complex queries
+					Wide column store (nested map ColumnFamily<RowKey, Columns<ColKey, Value, Timestamp>>): offer high availability and high scalability. They are often used for very large data sets. A wide column store's basic unit of data is a column (name/value pair). A column can be grouped in column families (analogous to a SQL table). Super column families further group column families. You can access each column independently with a row key, and columns with the same row key form a row. Each value contains a timestamp for versioning and for conflict resolution. (Cassandra, HBase)
+				SQL or NoSQL:  
+					SQL: Structured data, Strict schema, Relational data, Need for complex joins, Transactions, Clear patterns for scaling, More established: developers, community, code, tools, etc, Lookups by index are very fast
+					NoSQL: Semi-structured data, Dynamic or flexible schema, Non-relational data, No need for complex joins, Store many TB (or PB) of data, Very data intensive workload, Very high throughput for IOPS
+			Cache: client caching, CDN caching, web service (reverse proxy) caching, app caching and db caching. Cons: consistency between db and cache, added complexity, when to update cache is also an issue
+				Redis: persistence option, support some data structures, like set, list
+				Caching at the database query level: suffers from expiration issues
+				Caching at the object level: 
+				When to update the cache: 
+					Cache-aside: lazy loading, cause some delay when miss, cold cache
+					Write-through: Application adds/updates entry in cache, Cache synchronously writes entry to data store, also has cold cache issue
+					Write-behind (write-back): Add/update entry in cache, Asynchronously write entry to the data store, improving write performance. Cons: possible data loss if cache down, complex to implement
+					Refresh-ahead: Not accurately predicting which items are likely to be needed in the future can result in reduced performance than without refresh-ahead.
+			Asynchronism: 
+
+				
+					
+			
+			
+			
+			
+			

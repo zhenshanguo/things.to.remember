@@ -4,3 +4,7 @@
 
 3. Sage: merge 2 list of intergers, and one db query involves left join, group by, order by. 
 
+4. Strivr: given s and t, check if s can be formed by concatenating t. if not, return -1. if yes, check if there is a sub string in t, as x, so that both s and t can be formed by concantenating x, return the smallest x
+
+5. Paypal: detect cycle in a dependency graph
+

@@ -1,1 +1,4 @@
 1. dividing 2 integers: first thing is to check boundary of both dividend and divisor on both ends (0 and minimum). second we first need to find the largest power of 2 for the divisor that is smaller than the dividend. then we loop backward and check if remaining dividend can subtract current divisor till the power of 2 get to 1. 
+2. x & (x - 1) clears lowest set bit in x, and x & ~(x - 1) extract the lowest set bit in x
+3. ^ with 1 gets its compliment. ^ with 0 gets itself. & with 1 gets itself, & with 0 always get 0. | with 1 always get 1, | with 0 gets itself
+4. use ^ for bit addition, the result is set on the bit. for the calculation on carryout, use & on the bit (both 1, the carryout will be 1)
