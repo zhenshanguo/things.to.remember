@@ -8,3 +8,8 @@
 
 5. Paypal: detect cycle in a dependency graph
 
+6. Paypal 2: product exception self
+
+7. Coursera: regular expression matching (. and ?). Text justify
+
+8. Intacct: sorting 3 colors, 
