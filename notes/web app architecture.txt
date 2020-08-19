@@ -1,0 +1,137 @@
+1. layers is for code organization and tiers are for physical and logic components
+
+2. web socket is built on top of tcp, not http, is bidirectional and both client and server need to support it
+
+3. ajax long poll, kinda of between ajax poll and web socket, server keeps the connection open till update is avaialble
+
+4. html5 source api & sever sent events: this is one direction data pushing from server, good for feeds
+
+5. streaming api: good for stream large multi-media files from server to client
+
+6. In the industry tech like Cadvisor, Prometheus and Grafana are pretty popular for tracking the system via web-based dashboards
+
+7. when to pick NoSQL: 
+	Handling A Large Number Of Read Write Operations
+	Flexibility With Data Modeling
+	Eventual Consistency Over Strong Consistency
+	Running Data Analytics
+
+8. when to pick RDBMS: 
+	Transactions & Data Consistency
+	Storing Relationships
+
+9. A well-designed SQL data store will always be more performant than a not so well-designed NoSQL store
+
+10. Polyglot persistence means using several different persistence technologies to fulfil different persistence requirements in an application
+	store relationships, ACID transactions and strong consistency: RDBMS
+	caching, low latency access: key-value, Redis memcached
+	running analytics on big data: wide-column datastore
+	providing recommendations to users: graphic database
+	website search: document oriented datastore, mongo or elastic search
+	
+11. Multi-model databases support multiple data models like Graph, Document-Oriented, Relational etc in a single database system. 
+
+12. CAP theorem: consistency, availability, and partition falut tolerant, you can pick 2 of them, but not all
+
+13. NoSQL databases: 
+	Wide-column databases primarily used to handle massive amounts of data, technically called the Big Data. 
+	are perfect for analytical use cases. They have a high performance and a scalable architecture. Also 
+	known as column-oriented databases wide-column databases store data in a record with a dynamic number of columns. 
+	A record can hold billions of columns.
+	
+	Time-Series data is generally ingested from IoT devices, self-driving vehicles, industry sensors, social networks, stock market financial data
+	Time-series data is primarily used for running analytics, deducing conclusions and making future business decisions looking at the results of the analytics
+	
+	A primary use case of a Key-value database is to implement caching in applications due to the minimum latency they ensure
+	If you have a use case where you need to fetch data real fast with minimum fuss & backend processing then you should pick a key-value data store
+	
+	Graph databases are faster as the relationships in them are not calculated at the query time
+	the relationships here are persisted in the data store in the form of edges and we just have to fetch them
+	Ideal use cases of graph databases are building social, knowledge, network graphs. Writing AI-based apps, recommendation engines, fraud analysis app, storing genetic data etc
+	
+	They store data in a document-oriented model in independent documents. The data is generally semi-structured & stored in a JSON-like format
+	If you are working with semi-structured data, need a flexible schema which would change often, Pick a Document-Oriented data store
+	
+14: Caching: cache-aside, read-through for read heavy apps, write-through for write heavy apps, and write-behind
+
+15. Message queue: Message queues facilitate asynchronous behaviour
+	A Publish-Subscribe model is the model where multiple consumers receive the same message sent from a single or multiple producers
+	Point to point communication is a pretty simple use case where the message from the producer is consumed by only one consumer
+	there are two protocols popular when working with message queues. AMQP Advanced Message Queue Protocol & STOMP Simple or Streaming Text Oriented Message Protocol
+
+16. Stream Processing: Data Ingestion is a collective term for the process of collecting data streaming-in from several different sources and making it ready to be processed by the system
+		data collection, data processing, data analysis, data visualization, data security and data storage
+		data ingestion: real-time and in-batches
+		data ingestion use cases: 
+			moving big data to Hadoop
+			Streaming data from databases to elastic search servers
+			log processing: ELK Elastic LogStash Kibana
+			Stream Processing Engines for Real-Time Events: kafka with apache storm/spark, or kenesis
+		Data pipelines are the core component of a data processing infrastructure. They facilitate the efficient flow of data from one point to another & also enable the developers to apply filters on the data streaming-in in real-time
+			smooth data flow, add filters and business logic, facilitate parallel processing, avert bottleneck and redundancy, and avoid data corruption
+			data pipeline vs ETL (real-time vs batches)
+		Distributed data processing means diverging large amounts of data to several different nodes, running in a cluster, for parallel processing: Apache Zookeeper is used for coordinating
+			The most popular open-source implementation of the MapReduce programming model is Apache Hadoop.
+			Apache Spark is an open-source cluster computing framework. It provides high performance for both batch & real-time in-stream processing. Spark seamlessly integrates with distributed data stores like Cassandra, HDFS, MapReduce File System, Amazon S3 etc
+			Apache Storm is a distributed stream processing framework. In the industry, it is primarily used for processing massive amounts of streaming data. It has several different use cases such as real-time analytics, machine learning, distributed remote procedure calls etc
+			Apache Kafka is an open-source distributed stream processing & messaging platform. Hadoop is preferred for batch processing of data whereas Spark, Kafka & Storm are preferred for processing real-time streaming data
+		Lambda is a distributed data processing architecture that leverages both the batch & the real-time streaming data processing approaches to tackle the latency issues arising out of the batch processing approach. It joins the results from both the approaches before presenting it to the end user
+		Kappa contains only two layers. Speed, which is the streaming processing layer, & the Serving which is the final layer. Kappa is not an alternative for Lambda. Both the architectures have their use cases
+		* Kappa is preferred if the batch and the streaming analytics results are fairly identical in a system. Lambda is preferred if they are not
+		
+17. Event Driven Architecture, aslo known as Non-blocking architecture or Reactive architecture. Technologies like NodeJS, frameworks in the Java ecosystem like Play, Akka.io are non-blocking in nature and are built for modern high IO scalable applications
+	NodeJS is a single-threaded non-blocking framework written to handle more IO intensive tasks. It has an event loop architecture, NodeJS is not fit for CPU intensive tasks
+	
+18. Shared Nothing Architecture means eliminating all single points of failure. Every module has its own memory, own disk. So even if several modules in the system go down, the other modules online stay unaffected. It also helps with the scalability and performance.
+
+19. the Hexagonal pattern has its stance pretty clear, there is an inside component which holds the business logic & then the outside layer, the Ports & the Adapters which involve the databases, message queues, APIs & stuff
+
+20. A P2P network is a network in which computers also known as nodes can communicate with each other without the need of a central server
+	The data is exchanged over TCP IP just like it happens over the HTTP protocol in a client-server model. The P2P design has an overlay network over TCP IP which enables the users to connect directly. Nodes/Peers are indexed & discoverable in this overlay network
+	Based on how these peers are linked with each other in the network, the networks are classified into a Structured, Unstructured or a Hybrid model
+
+21. decentralized social networks have servers, spread out across the globe, hosted by individuals. 
+the user data layer is separate & they run on standardized protocols, specifically designed for the decentralized web. 
+The data formats & protocols are consistent across the networks & apps
+Features of decentralized social network: Bring Your Own Data, Ensuring the Safety of Our Data, Economic Compensation to the parties involved in the network, Infrastructure Ease
+
+	A federated network has entities called servers or pods. A large number of nodes subscribe to the pods. There are several pods in the network that are linked to each other & share information with each other
+
+22. Real-time Data Interaction: You need a persistent connection between the client and server, also you need a non-blocking technology on the back-end. NodeJS, Spring Reactor, Play, Akka.io
+	Peer to Peer Web Application: Look into JavaScript, protocols like DAT, IPFS. Checkout FreedomJS, it’s a framework for building P2P web apps that work in the modern web browsers
+	CRUD-based Regular Application: like online movie booking portal, a tax filing app etc, Spring MVC, Python Django, Ruby on Rails, PHP Laravel, ASP .NET MVC
+	Simple, Small Scale Applications: PHP is ideally used in these kinds of scenarios. We can also consider other web frameworks like Spring boot, Ruby on Rails, which cut down the verbosity, configuration, development time by notches & facilitate rapid development. But PHP hosting will cost much less in comparison to hosting other technologies. It is ideal for very simple use cases
+	CPU & Memory Intensive Applications: Big Data Processing, Parallel Processing, Running Monitoring & Analytics on quite a large amount of data. C++, java, scala, erLang, go, etc
+	
+23. Key Things To Remember When Picking the Tech Stack: 
+	Be Thorough with the Requirements
+	See If What We Already Know Fits the Requirements
+	Does the Tech We Have Picked Has An Active Community? How Is the Documentation & the Support?
+	Is the Tech Being Used by Big Guns in Production?
+	Check the License. Is It Open Source?
+	Availability Of Skilled Resources on the Tech
+	
+24. Generally, in e-commerce sites or when booking travel tickets, the number of tickets shown on the website are not accurate, they are the cached values. When a user moves on to buy a particular ticket, checks out the cart, then the system polls the database for the accurate value & locks the resource for the transaction
+
+25. Mobile Apps: mobile-only, mobile-first and mobile-friendly
+	Responsive Interfaces (websites adapted to different screen sizes): A popular saying with responsive web design is that the content should be like water, it should take the shape of the vessel it is poured in
+		BootstrapJS is a production-grade open-source CSS framework for designing responsive user interfaces. friendly to backend developers. another choice is Jquery Mobile. 
+	Native Apps vs Hybrid Apps: 
+		Native apps are built specifically for an OS or hardware, they interact directly with the OS and device hardware without going through some wrapper, adapter or middle layer, thus they have high performance and UI responsiveness
+		Hybrid apps are a hybrid between the native and the web-based technologies, are primarily built using open web-based technologies such as Html5, CSS, JavaScript. They run in a native-container and communicate with the native OS via a wrapper or a middle layer. frameworks for hybrid apps: React-Native, Ionic, Cordova
+			Issues With Hybrid Apps: performance and UI rendering or responsiveness. type safety miss from JS frameworks
+		Progressive Web Apps or PWAs are apps, with the look and feel of native apps, that can run in the browser of both mobile and desktop devices & can also be installed, from the browser, on the device of the user. When installed on the device, progressive web apps run in their own window without an address bar or a browser tab just like the native apps
+			progressive web apps are developed using the open web technologies like Html, CSS, JavaScript, also with the help of frameworks like Angular, React, Ionic, Google Polymer
+	Mobile Backend as a Service or MBaaS is a cloud-based service model that takes care of the backend infrastructure of our mobile app and enables us to focus on the business logic and the user interface
+		things are taken care of by mbaas, like user authentication, integration with social networks, push-notifications, real-time database, caching, data storage, messaging, chat integration, integration of third-party tools, analytics, crash reporting and so on
+		Cons: no control on the backend service at all, vendor can stop or even shut down the service, updating pricing, etc.
+		
+		
+	
+
+		
+		
+		
+	
+17. 
+
