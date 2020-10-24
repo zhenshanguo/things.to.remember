@@ -31,7 +31,7 @@
 	
 11. Multi-model databases support multiple data models like Graph, Document-Oriented, Relational etc in a single database system. 
 
-12. CAP theorem: consistency, availability, and partition falut tolerant, you can pick 2 of them, but not all
+12. CAP theorem: consistency, availability, and partition fault tolerant, you can pick 2 of them, but not all
 
 13. NoSQL databases: 
 	Wide-column databases primarily used to handle massive amounts of data, technically called the Big Data. 
@@ -52,7 +52,7 @@
 	They store data in a document-oriented model in independent documents. The data is generally semi-structured & stored in a JSON-like format
 	If you are working with semi-structured data, need a flexible schema which would change often, Pick a Document-Oriented data store
 	
-14: Caching: cache-aside, read-through for read heavy apps, write-through for write heavy apps, and write-behind
+14: Caching: cache-aside, read-through for read heavy apps, write-through , and write-behind for write heavy apps (more performant since it saves in cache and sync to db later)
 
 15. Message queue: Message queues facilitate asynchronous behaviour
 	A Publish-Subscribe model is the model where multiple consumers receive the same message sent from a single or multiple producers
@@ -126,12 +126,4 @@ Features of decentralized social network: Bring Your Own Data, Ensuring the Safe
 		things are taken care of by mbaas, like user authentication, integration with social networks, push-notifications, real-time database, caching, data storage, messaging, chat integration, integration of third-party tools, analytics, crash reporting and so on
 		Cons: no control on the backend service at all, vendor can stop or even shut down the service, updating pricing, etc.
 		
-		
-	
-
-		
-		
-		
-	
-17. 
 

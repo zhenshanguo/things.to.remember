@@ -65,5 +65,4 @@ Time complexity #
 The time complexity of the above algorithm is O(N+N*logK).
 
 Space complexity # 
-The space complexity will be O(N). Even though we are storing only ‘K’ numbers in the
-heap. For the frequency map, however, we need to store all the ‘N’ numbers.
+
