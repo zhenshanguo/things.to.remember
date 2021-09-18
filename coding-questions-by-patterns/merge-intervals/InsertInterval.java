@@ -25,7 +25,7 @@ Explanation: After insertion, since [1,4] overlaps with [2,3], we merged them in
 Solution #
 If the given list was not sorted, we could have simply appended the new interval to it and
 used the merge() function from Merge Intervals. But since the given list is sorted, we
-should try to come up with a solution better than O(N * logN)O(N∗logN)
+should try to come up with a solution better than O(N * logN)
 
 When inserting a new interval in a sorted list, we need to first find the correct index
 where the new interval can be placed. In other words, we need to skip all the intervals

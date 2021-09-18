@@ -1,4 +1,5 @@
-Introduction # Given the weights and profits of ‘N’ items, we are asked to put these items
+Introduction
+# Given the weights and profits of ‘N’ items, we are asked to put these items
 in a knapsack which has a capacity ‘C’. The goal is to get the maximum profit out of the
 items in the knapsack. Each item can only be selected once, as we don’t have multiple
 quantities of any item.
@@ -81,8 +82,8 @@ can’t have more than ‘n’ recursive calls on the call stack at any time.
 
 
 
-Top-down Dynamic Programming with Memoization # Memoization is when we store the results
-of all the previously solved sub-problems and return the results from memory if we
+Top-down Dynamic Programming with Memorization
+# Memorization is when we store the results of all the previously solved sub-problems and return the results from memory if we
 encounter a problem that has already been solved.
 
 Since we have two changing values (capacity and currentIndex) in our recursive function

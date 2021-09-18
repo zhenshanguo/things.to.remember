@@ -24,7 +24,7 @@ sorted in ascending order. Here are the set of steps for Binary Search:
 Let’s assume start is pointing to the first index and end is pointing to the last index of
 the input array (let’s call it arr). This means: int start = 0; int end = arr.length - 1;
 First, we will find the middle of start and end. An easy way to find the middle would be:
-middle=(start+end)/2middle=(start+end)/2. For Java and C++, this equation will work for
+middle=(start+end)/2. For Java and C++, this equation will work for
 most cases, but when start or end is large, this equation will give us the wrong result
 due to integer overflow. Imagine that end is equal to the maximum range of an integer
 (e.g. for Java: int end = Integer.MAX_VALUE). Now adding any positive number to end will

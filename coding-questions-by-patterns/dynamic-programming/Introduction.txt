@@ -7,4 +7,4 @@ will always start with a brute-force recursive solution to see the overlapping s
 i.e., realizing that we are solving the same problems repeatedly.
 
 After the recursive solution, we will modify our algorithm to apply advanced techniques of 
-Memoization and Bottom-Up Dynamic Programming to develop a complete understanding of this pattern
+Memorization and Bottom-Up Dynamic Programming to develop a complete understanding of this pattern

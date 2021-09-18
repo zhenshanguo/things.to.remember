@@ -1,5 +1,5 @@
 Problem Statement #
-Given an N * NN∗N matrix where each row and column is sorted in ascending order, find the Kth smallest element in the matrix.
+Given an N * N matrix where each row and column is sorted in ascending order, find the Kth smallest element in the matrix.
 
 Example 1:
 

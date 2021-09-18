@@ -87,7 +87,7 @@ elements in allPaths will be O(N/2) = O(N). Now, each of these paths can have ma
 in them. For a balanced binary tree (like above), each leaf node will be at maximum depth.
 As we know that the depth (or height) of a balanced binary tree is O(logN) we can say
 that, at the most, each path can have logNlogN nodes in it. This means that the total size
-of the allPaths list will be O(N*logN)O(N∗logN). If the tree is not balanced, we will
+of the allPaths list will be O(N*logN). If the tree is not balanced, we will
 still have the same worst-case space complexity.
 
 From the above discussion, we can conclude that the overall space complexity of our

@@ -1,4 +1,3 @@
-Problem Statement #
 In a non-empty array of numbers, every number appears exactly twice except two numbers
 that appear only once. Find the two numbers that appear only once.
 

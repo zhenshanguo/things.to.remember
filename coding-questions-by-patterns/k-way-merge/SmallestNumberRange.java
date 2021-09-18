@@ -1,4 +1,5 @@
-Problem Statement # Given ‘M’ sorted arrays, find the smallest range that includes at
+Problem Statement
+# Given ‘M’ sorted arrays, find the smallest range that includes at
 least one number from each of the ‘M’ lists.
 
 Example 1:
@@ -16,7 +17,7 @@ We can start by inserting the first number from all the arrays in a min-heap. We
 track of the largest number that we have inserted in the heap (let’s call it
 currentMaxNumber).
 
-In a loop, we’ll take the smallest (top) element from the min-heap andcurrentMaxNumber has
+In a loop, we’ll take the smallest (top) element from the min-heap and currentMaxNumber has
 the largest element that we inserted in the heap. If these two numbers give us a smaller
 range, we’ll update our range. Finally, if the array of the top element has more elements,
 we’ll insert the next element to the heap.

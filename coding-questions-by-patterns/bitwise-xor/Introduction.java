@@ -10,7 +10,7 @@ A	B	A xor B
 It is surprising to know the approaches that the XOR operator enables us to solve certain
 problems. For example, let’s take a look at the following problem:
 
-Given an array of n-1n−1 integers in the range from 11 to nn, find the one number that is
+Given an array of n-1 integers in the range from 1 to n, find the one number that is
 missing from the array.
 
 Example:
@@ -19,7 +19,7 @@ Input: 1, 5, 2, 6, 4
 Answer: 3
 A straight forward approach to solve this problem can be:
 
-	1. Find the sum of all integers from 11 to nn; let’s call it s1.
+	1. Find the sum of all integers from 1 to n; let’s call it s1.
 	2. Subtract all the numbers in the input array from s1; this will give us the missing number.
 	
 	
@@ -61,7 +61,7 @@ means that if we XOR all the numbers in the input array with all numbers from th
 to n then each number in the input is going to get zeroed out except the missing number.
 Following are the set of steps to find the missing number using XOR:
 
-XOR all the numbers from 1 to nn, let’s call it x1. XOR all the numbers in the input
+XOR all the numbers from 1 to n, let’s call it x1. XOR all the numbers in the input
 array, let’s call it x2. The missing number can be found by x1 XOR x2.
 
 class MissingNumber {

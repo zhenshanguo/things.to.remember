@@ -16,7 +16,7 @@ Solution #
 As we know, the median is the middle value in an ordered integer list. So a brute force
 solution could be to maintain a sorted list of all numbers inserted in the class so that
 we can efficiently return the median whenever required. Inserting a number in a sorted
-list will take O(N)O(N) time if there are ‘N’ numbers in the list. This insertion will be
+list will take O(N) time if there are ‘N’ numbers in the list. This insertion will be
 similar to the Insertion sort. Can we do better than this? Can we utilize the fact that we
 don’t need the fully sorted list - we are only interested in finding the middle element?
 

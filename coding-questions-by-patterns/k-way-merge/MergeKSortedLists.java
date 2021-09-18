@@ -10,7 +10,7 @@ Input: L1=[5, 8, 9], L2=[1, 7] Output: [1, 5, 7, 8, 9]
 
 Solution # A brute force solution could be to add all elements of the given ‘K’ lists to
 one list and sort it. If there are a total of ‘N’ elements in all the input lists, then
-the brute force solution will have a time complexity of O(N*logN)O(N∗logN) as we will need
+the brute force solution will have a time complexity of O(N∗logN) as we will need
 to sort the merged list. Can we do better than this? How can we utilize the fact that the
 input lists are individually sorted?
 
