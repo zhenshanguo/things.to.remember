@@ -65,7 +65,7 @@
         <netflix.hystrix.dashboard>2.2.2.RELEASE</netflix.hystrix.dashboard>
         <messagingcryptoVersion>release-2.2</messagingcryptoVersion>
         <groovy.version>2.4.8</groovy.version>
-        <amazon.sdk.version>1.11.629</amazon.sdk.version>
+        <amazon.sdk.version>1.12.261</amazon.sdk.version>
         <amazon.java.messaging>1.0.3</amazon.java.messaging>
         <activemq.version>5.15.9</activemq.version>
         <evo.inflector.version>1.2.1</evo.inflector.version>
